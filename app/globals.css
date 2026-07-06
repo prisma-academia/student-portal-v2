@@ -128,3 +128,23 @@
     @apply font-sans;
   }
 }
+
+/* FullCalendar event categories (env-driven via inline CSS variables on wrapper) */
+.fc-calendar-root .category-department {
+  background-color: var(--brand-calendar-department-bg, rgb(248, 157, 157));
+}
+.fc-calendar-root .category-department:hover {
+  background-color: var(--brand-calendar-department-hover, rgb(252, 176, 176));
+}
+.fc-calendar-root .category-class {
+  background-color: var(--brand-calendar-class-bg, rgb(190, 248, 157));
+}
+.fc-calendar-root .category-class:hover {
+  background-color: var(--brand-calendar-class-hover, rgb(204, 250, 177));
+}
+.fc-calendar-root .category-general {
+  background-color: var(--brand-calendar-general-bg, rgb(157, 195, 248));
+}
+.fc-calendar-root .category-general:hover {
+  background-color: var(--brand-calendar-general-hover, rgb(138, 182, 245));
+}
