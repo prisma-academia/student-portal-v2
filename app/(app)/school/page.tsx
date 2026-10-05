@@ -35,14 +35,15 @@ import {
   FIRST_SEMESTER,
   SECOND_SEMESTER,
   buildClassRows,
-  buildResultRows,
 } from "@/lib/academic-levels";
 import {
   courseFormPdfUrl,
   fetchFees,
+  fetchResultsSummary,
   initializePayment,
   receiptPdfUrl,
   resultsPdfUrl,
+  transcriptPdfUrl,
 } from "@/lib/api/student";
 import { formatDate, formatNaira } from "@/lib/format";
 import { useAuthStore } from "@/stores/auth-store";
@@ -295,105 +296,175 @@ function SemesterDownload({
   );
 }
 
+function formatGpa(value: number | null, decimals = 2) {
+  return value === null || value === undefined ? "—" : value.toFixed(decimals);
+}
+
 function ResultTab() {
-  const user = useAuthStore((s) => s.user);
-  const rows = buildResultRows(user);
+  const q = useQuery({
+    queryKey: ["student", "results-summary"],
+    queryFn: async () => {
+      const res = await fetchResultsSummary();
+      if (!res.ok) throw new Error(res.message);
+      return res.data;
+    },
+  });
+
+  if (q.isPending) return <PageLoader className="min-h-[160px] py-6" />;
+  if (q.isError) {
+    return (
+      <QueryErrorPanel message={q.error.message} onRetry={() => q.refetch()} />
+    );
+  }
+
+  const summary = q.data;
+  const scheme = summary?.gradingScheme;
+  const decimals = scheme?.gpaDecimals ?? 2;
+  const sittings = summary?.semesters ?? [];
+
+  if (!summary || sittings.length === 0) {
+    return (
+      <EmptyState
+        title="No published results yet"
+        description="Your results appear here once the college publishes them."
+      />
+    );
+  }
 
   return (
     <div className="flex flex-col gap-4">
-      <Alert>
-        <AlertTitle>Results download</AlertTitle>
-        <AlertDescription className="text-xs">
-          This portal calls{" "}
-          <code className="text-xs">GET /api/v1/student/results</code>. If your
-          API does not implement this route yet, downloads will fail — coordinate
-          with your backend team.
-        </AlertDescription>
-      </Alert>
-      {!user?.program || !user?.classLevel ? (
-        <EmptyState
-          title="Program unavailable"
-          description="Program or class information is missing."
-        />
-      ) : (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Results by year</CardTitle>
-            <CardDescription>
-              Download result PDFs when marked available.
-            </CardDescription>
+      <Card>
+        <CardHeader className="flex flex-row flex-wrap items-start justify-between gap-2">
+          <div>
+            <CardTitle className="text-base">Academic standing</CardTitle>
+            {scheme && (
+              <CardDescription>
+                {scheme.name} · {scheme.maxPoint}-point scale · pass mark{" "}
+                {scheme.passMark}
+              </CardDescription>
+            )}
+          </div>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="h-8 gap-1 text-xs"
+            onClick={() => {
+              window.location.href = transcriptPdfUrl();
+            }}
+          >
+            <IconDownload className="size-3.5" />
+            Transcript
+          </Button>
+        </CardHeader>
+        <CardContent className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <Stat label="CGPA" value={formatGpa(summary.cgpa, decimals)} />
+          <Stat label="Class" value={summary.classification?.name ?? "—"} />
+          <Stat label="Units registered" value={String(summary.totalCredits)} />
+          <Stat label="Units earned" value={String(summary.creditsEarned)} />
+        </CardContent>
+        {summary.outstanding.length > 0 && (
+          <CardContent className="pt-0">
+            <Alert variant="destructive">
+              <AlertTitle>Carry-over courses</AlertTitle>
+              <AlertDescription className="text-xs">
+                You still owe:{" "}
+                {summary.outstanding.map((c) => `${c.code} (${c.name})`).join(", ")}
+              </AlertDescription>
+            </Alert>
+          </CardContent>
+        )}
+      </Card>
+
+      {[...sittings].reverse().map((sitting) => (
+        <Card key={`${sitting.session?.id}-${sitting.semester}`}>
+          <CardHeader className="flex flex-row flex-wrap items-start justify-between gap-2">
+            <div>
+              <CardTitle className="text-sm">
+                {sitting.session?.name} · {sitting.semester}
+              </CardTitle>
+              <CardDescription>
+                {sitting.classLevel?.name ?? ""} · GPA{" "}
+                {formatGpa(sitting.gpa, decimals)} · CGPA{" "}
+                {formatGpa(sitting.cgpa, decimals)}
+              </CardDescription>
+            </div>
+            {sitting.classLevel && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="h-8 gap-1 text-[0.65rem]"
+                onClick={() => {
+                  window.location.href = resultsPdfUrl(
+                    sitting.semester,
+                    String(sitting.classLevel?.level ?? ""),
+                  );
+                }}
+              >
+                <IconDownload className="size-3.5" />
+                PDF
+              </Button>
+            )}
           </CardHeader>
           <CardContent className="overflow-x-auto px-2 sm:px-4">
-            <table className="w-full min-w-[560px] text-left text-xs">
+            <table className="w-full min-w-[520px] text-left text-xs">
               <thead>
                 <tr className="border-b">
-                  <th className="p-2 font-medium">Year</th>
-                  <th className="p-2 font-medium">Class</th>
-                  <th className="p-2 font-medium">Status</th>
-                  <th className="p-2 font-medium">1st sem.</th>
-                  <th className="p-2 font-medium">2nd sem.</th>
+                  <th className="p-2 font-medium">Code</th>
+                  <th className="p-2 font-medium">Course</th>
+                  <th className="p-2 font-medium">Units</th>
+                  <th className="p-2 font-medium">Score</th>
+                  <th className="p-2 font-medium">Grade</th>
+                  <th className="p-2 font-medium">GP</th>
+                  <th className="p-2 font-medium">Remark</th>
                 </tr>
               </thead>
               <tbody>
-                {rows.map((row) => (
-                  <tr key={row.id} className="border-b last:border-0">
-                    <td className="p-2">{row.year}</td>
-                    <td className="p-2 font-medium">{row.classLabel}</td>
+                {sitting.courses.map((course) => (
+                  <tr key={course.resultId} className="border-b last:border-0">
+                    <td className="p-2 font-medium">
+                      {course.code}
+                      {course.isCarryOver && (
+                        <Badge variant="outline" className="ml-1 text-[0.55rem]">
+                          CO
+                        </Badge>
+                      )}
+                    </td>
+                    <td className="p-2">{course.name}</td>
+                    <td className="p-2">{course.credit}</td>
+                    <td className="p-2">{course.score}</td>
                     <td className="p-2">
-                      <Badge variant="outline" className="text-[0.6rem]">
-                        {row.status}
+                      <Badge
+                        variant={course.isPass ? "secondary" : "outline"}
+                        className={
+                          course.isPass
+                            ? "text-[0.6rem]"
+                            : "border-destructive text-[0.6rem] text-destructive"
+                        }
+                      >
+                        {course.grade}
                       </Badge>
                     </td>
-                    <td className="p-2">
-                      <ResultDownload
-                        available={row.firstSemester === "Available"}
-                        semester={FIRST_SEMESTER}
-                        yearId={row.id}
-                      />
-                    </td>
-                    <td className="p-2">
-                      <ResultDownload
-                        available={row.secondSemester === "Available"}
-                        semester={SECOND_SEMESTER}
-                        yearId={row.id}
-                      />
-                    </td>
+                    <td className="p-2">{course.gradePoint}</td>
+                    <td className="p-2 text-muted-foreground">{course.remark}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </CardContent>
         </Card>
-      )}
+      ))}
     </div>
   );
 }
 
-function ResultDownload({
-  available,
-  semester,
-  yearId,
-}: {
-  available: boolean;
-  semester: string;
-  yearId: string;
-}) {
-  if (!available) {
-    return <span className="text-muted-foreground">—</span>;
-  }
+function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <Button
-      type="button"
-      variant="outline"
-      size="sm"
-      className="h-8 gap-1 text-[0.65rem]"
-      onClick={() => {
-        window.location.href = resultsPdfUrl(semester, yearId);
-      }}
-    >
-      <IconDownload className="size-3.5" />
-      PDF
-    </Button>
+    <div className="rounded-md border p-3 text-center">
+      <p className="text-[0.65rem] text-muted-foreground">{label}</p>
+      <p className="text-lg font-semibold">{value}</p>
+    </div>
   );
 }
 

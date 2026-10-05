@@ -8,7 +8,7 @@ This document describes the **Student Portal frontend** in a way that lets an AI
   - Sign-in (email or registration number + password)
   - Forgot password → reset password (token link)
   - Change password (credential-based)
-  - First-time setup (activate account) with optional profile picture + DOB + password change
+  - First-time setup (activate account) with required profile picture + DOB + password change
 - **Home**
   - View memos (public + targeted by program/class level)
   - View calendar events (public + targeted) in a calendar/list UI
@@ -119,13 +119,11 @@ This section describes behavior without React-specific details.
 User provides:
 - `currentPassword` (from onboarding/welcome email)
 - `newPassword`, `confirmPassword`
-- `dateOfBirth`
-- optional profile picture upload
+- `dateOfBirth` (always `YYYY-MM-DD`, from an `<input type="date">`)
+- profile picture (**required**)
 
-Client calls `POST /api/v1/student/setup` either as:
-
-- **JSON** (no picture)
-- **multipart/form-data** (with `picture`)
+Client calls `POST /api/v1/student/setup` as **multipart/form-data** (with `picture`).
+The picture is required, so there is no JSON variant of this request.
 
 On success:
 - Persist `user/token/refreshToken`
@@ -289,27 +287,17 @@ The backend attempts to read JWT from (in order):
 - `400`
 - `{ "ok": false, "message": "Student not found" | "Invalid password" | "Account is disabled." }`
 
-### `POST /api/v1/student/setup` (public; JSON or multipart)
+### `POST /api/v1/student/setup` (public; multipart only)
 
-**Purpose**: Activate/setup an account in `setup` status using credentials; optionally upload profile picture.
+**Purpose**: Activate/setup an account in `setup` status using credentials, and upload the required profile picture.
 
-**Request (JSON)** when no picture:
-
-```json
-{
-  "email": "student@example.com",
-  "regNumber": "ABC/123",
-  "currentPassword": "temp-password",
-  "newPassword": "new-password",
-  "dateOfBirth": "2000-01-31"
-}
-```
-
-Either `email` or `regNumber` must be present (frontend may send both if available).
-
-**Request (multipart/form-data)** when picture is present:
+**Request (multipart/form-data)**
 
 - Fields: `email?`, `regNumber?`, `currentPassword`, `newPassword`, `dateOfBirth`, `picture` (file)
+- `dateOfBirth` must be `YYYY-MM-DD` (for example `2000-01-31`)
+- `picture` is **required**; a request sent without it is rejected with `400 { "ok": false, "message": "No file found" }`
+
+Either `email` or `regNumber` must be present (frontend may send both if available).
 
 **Success response**
 

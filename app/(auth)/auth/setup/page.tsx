@@ -11,7 +11,7 @@ import {
   clearSetupTransfer,
   readSetupTransfer,
 } from "@/lib/auth-transfer";
-import { setupAccountFormData, setupAccountJson } from "@/lib/api/student";
+import { setupAccountFormData } from "@/lib/api/student";
 import { unwrapData } from "@/lib/api/client";
 import { useAuthStore } from "@/stores/auth-store";
 import type { Student } from "@/types/student";
@@ -57,27 +57,19 @@ export default function SetupPage() {
       if (!form.dateOfBirth) {
         throw new Error("Date of birth is required.");
       }
-
-      if (file) {
-        const fd = new FormData();
-        if (email) fd.append("email", email);
-        if (regNumber) fd.append("regNumber", regNumber);
-        fd.append("currentPassword", form.currentPassword);
-        fd.append("newPassword", form.newPassword);
-        fd.append("dateOfBirth", form.dateOfBirth);
-        fd.append("picture", file);
-        const res = await setupAccountFormData(fd);
-        if (!res.ok) throw new Error(res.message);
-        return res.data;
+      if (!file) {
+        throw new Error("A profile picture is required.");
       }
 
-      const res = await setupAccountJson({
-        ...(email && { email }),
-        ...(regNumber && { regNumber }),
-        currentPassword: form.currentPassword,
-        newPassword: form.newPassword,
-        dateOfBirth: form.dateOfBirth,
-      });
+      // The picture is required, so setup is always multipart.
+      const fd = new FormData();
+      if (email) fd.append("email", email);
+      if (regNumber) fd.append("regNumber", regNumber);
+      fd.append("currentPassword", form.currentPassword);
+      fd.append("newPassword", form.newPassword);
+      fd.append("dateOfBirth", form.dateOfBirth);
+      fd.append("picture", file);
+      const res = await setupAccountFormData(fd);
       if (!res.ok) throw new Error(res.message);
       return res.data;
     },
@@ -114,7 +106,7 @@ export default function SetupPage() {
       <div>
         <h1 className="text-lg font-semibold">Activate account</h1>
         <p className="text-muted-foreground mt-1 text-xs">
-          Set your password, date of birth, and optional profile photo.
+          Set your password and date of birth, and add a profile photo.
         </p>
       </div>
       <form
@@ -180,11 +172,12 @@ export default function SetupPage() {
           />
         </div>
         <div className="flex flex-col gap-2">
-          <Label htmlFor="picture">Profile picture (optional)</Label>
+          <Label htmlFor="picture">Profile picture</Label>
           <Input
             id="picture"
             type="file"
             accept="image/*"
+            required
             className="min-h-11 py-2"
             onChange={(e) => setFile(e.target.files?.[0] ?? null)}
           />

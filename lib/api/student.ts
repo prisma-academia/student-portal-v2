@@ -1,4 +1,10 @@
-import type { Fee, Memo, Student, StudentDocument } from "@/types/student";
+import type {
+  AcademicSummary,
+  Fee,
+  Memo,
+  Student,
+  StudentDocument,
+} from "@/types/student";
 import {
   apiGet,
   apiPatch,
@@ -145,6 +151,23 @@ export function courseFormPdfUrl(semester: string, yearId: string): string {
     ...(token ? { token } : {}),
   });
   return `${baseUrl}/api/v1/course/forms?${params.toString()}`;
+}
+
+/** Published results: sittings, GPA, CGPA, class of award, outstanding courses. */
+export async function fetchResultsSummary() {
+  const res = await apiGet<unknown>("/api/v1/student/me/results-summary");
+  if (!res.ok) return res;
+  const summary = unwrapData<AcademicSummary>(res.data);
+  return { ...res, data: summary as unknown } as typeof res & {
+    data: AcademicSummary;
+  };
+}
+
+export function transcriptPdfUrl(): string {
+  const { baseUrl } = getConfig();
+  const token = useAuthStore.getState().token;
+  const params = new URLSearchParams(token ? { token } : {});
+  return `${baseUrl}/api/v1/student/me/transcript?${params.toString()}`;
 }
 
 export function resultsPdfUrl(semester: string, yearId: string): string {
