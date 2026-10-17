@@ -132,13 +132,18 @@ export async function verifyPayment(reference: string) {
   return apiPostPublic<unknown>("/api/v1/payment/verify", { reference });
 }
 
-/** Paths for authenticated PDF downloads; open them with openPdf() (lib/api/download.ts). */
+/** Paths for authenticated PDFs; open them with <PdfButton> (in-app viewer). */
 export const pdfPaths = {
   receipt: (paymentId: string) => `/api/v1/student/me/receipt/${paymentId}`,
   courseForm: (semester: string, yearId: string) =>
     `/api/v1/student/me/course-form?${new URLSearchParams({ semester, yearId })}`,
-  resultSlip: (semester: string, yearId: string) =>
-    `/api/v1/student/me/results?${new URLSearchParams({ semester, yearId })}`,
+  /** One exact sitting (session + semester); the level is a fallback for older APIs. */
+  resultSlip: (semester: string, sitting: { sessionId?: string; yearId?: string }) =>
+    `/api/v1/student/me/results?${new URLSearchParams({
+      semester,
+      ...(sitting.sessionId ? { sessionId: sitting.sessionId } : {}),
+      ...(sitting.yearId ? { yearId: sitting.yearId } : {}),
+    })}`,
   transcript: () => "/api/v1/student/me/transcript",
 };
 

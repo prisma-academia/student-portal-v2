@@ -1,6 +1,6 @@
 "use client";
 
-import { IconKey, IconLoader2 } from "@tabler/icons-react";
+import { IconKey } from "@tabler/icons-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "motion/react";
 import Link from "next/link";
@@ -199,8 +199,7 @@ export default function ProfilePage() {
                     <Button type="button" variant="ghost" onClick={() => setEdits(null)} disabled={mutation.isPending}>
                       Discard
                     </Button>
-                    <Button type="submit" disabled={mutation.isPending}>
-                      {mutation.isPending ? <IconLoader2 className="animate-spin" /> : null}
+                    <Button type="submit" loading={mutation.isPending}>
                       {mutation.isPending ? "Saving…" : "Save changes"}
                     </Button>
                   </div>

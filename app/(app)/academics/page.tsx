@@ -1,8 +1,14 @@
 "use client";
 
-import { IconAlertTriangle, IconBook2, IconClipboardList, IconFileCertificate } from "@tabler/icons-react";
+import {
+  IconAlertTriangle,
+  IconBook2,
+  IconChevronDown,
+  IconClipboardList,
+  IconFileCertificate,
+} from "@tabler/icons-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense } from "react";
+import { Suspense, useId, useMemo, useState } from "react";
 import { EmptyState } from "@/components/system/empty-state";
 import { PageHeader } from "@/components/system/page-header";
 import { ListSkeleton } from "@/components/system/page-loader";
@@ -33,33 +39,75 @@ function GradeBadge({ grade, pass }: { grade: string; pass: boolean }) {
   );
 }
 
-function Sitting({ sitting, decimals }: { sitting: ResultSitting; decimals: number }) {
+const slug = (v: string) => v.replace(/[^\w]+/g, "-").replace(/^-|-$/g, "").toLowerCase();
+
+function Sitting({
+  sitting,
+  decimals,
+  defaultOpen,
+}: {
+  sitting: ResultSitting;
+  decimals: number;
+  defaultOpen: boolean;
+}) {
+  const [open, setOpen] = useState(defaultOpen);
+  const bodyId = useId();
   const level = sitting.classLevel ? toLevel(sitting.classLevel.level) : null;
+  const failed = sitting.courses.filter((c) => !c.isPass).length;
+  const sessionName = sitting.session?.name ?? "";
+  const label = [sessionName, sitting.semester].filter(Boolean).join(" · ");
+
   return (
-    <section>
-      <header className="mb-3 flex flex-wrap items-center justify-between gap-3">
-        <div className="min-w-0">
-          <h3 className="text-base font-bold">
-            {sitting.session?.name} · {sitting.semester}
-          </h3>
-          <p className="text-muted-foreground text-sm">
-            {level ? `${level} level · ` : ""}GPA <span className="num text-foreground font-semibold">{formatGpa(sitting.gpa, decimals)}</span> · CGPA{" "}
-            <span className="num text-foreground font-semibold">{formatGpa(sitting.cgpa, decimals)}</span>
-          </p>
-        </div>
-        {level ? (
-          <PdfButton
-            size="sm"
-            endpoint={pdfPaths.resultSlip(sitting.semester, String(level))}
-            filename={`result-${level}-${sitting.semester.replace(/\s+/g, "-").toLowerCase()}`}
-          >
-            Result slip
-          </PdfButton>
-        ) : null}
+    <section className="bg-card overflow-hidden rounded-[var(--radius-xl)] border">
+      <header className="flex flex-wrap items-center gap-x-3 gap-y-2 px-4 py-3 sm:px-5">
+        <button
+          type="button"
+          aria-expanded={open}
+          aria-controls={bodyId}
+          onClick={() => setOpen((v) => !v)}
+          className="-my-1 flex min-h-11 min-w-0 flex-1 items-center gap-3 rounded-[var(--radius-md)] text-left"
+        >
+          <IconChevronDown
+            className={cn("text-muted-foreground size-5 shrink-0 transition-transform", open && "rotate-180")}
+            aria-hidden
+          />
+          <span className="min-w-0">
+            <span className="block font-bold">
+              {sitting.semester}
+              {level ? <span className="text-muted-foreground font-semibold"> · {level} level</span> : null}
+            </span>
+            <span className="text-muted-foreground block text-sm">
+              GPA <span className="num text-foreground font-semibold">{formatGpa(sitting.gpa, decimals)}</span> · CGPA{" "}
+              <span className="num text-foreground font-semibold">{formatGpa(sitting.cgpa, decimals)}</span> ·{" "}
+              <span className="num">{sitting.courses.length}</span> {sitting.courses.length === 1 ? "course" : "courses"}
+              {failed ? (
+                <span className="text-danger font-semibold">
+                  {" "}
+                  · <span className="num">{failed}</span> failed
+                </span>
+              ) : null}
+            </span>
+          </span>
+        </button>
+        <PdfButton
+          size="sm"
+          endpoint={pdfPaths.resultSlip(sitting.semester, {
+            sessionId: sitting.session?.id,
+            yearId: level ? String(level) : undefined,
+          })}
+          filename={`result-${slug(label)}`}
+          title={`Result slip · ${label}`}
+          disabled={!sitting.session?.id && !level}
+        >
+          Result slip
+        </PdfButton>
       </header>
 
+      {open ? (
+        <div id={bodyId} className="border-t">
+
       {/* phone: one row per course */}
-      <ul className={cn(rowList, "md:hidden")}>
+      <ul className="divide-y md:hidden">
         {sitting.courses.map((c) => (
           <li key={c.resultId} className="flex items-center gap-3 px-4 py-3 sm:px-5">
             <div className="min-w-0 flex-1">
@@ -67,6 +115,11 @@ function Sitting({ sitting, decimals }: { sitting: ResultSitting; decimals: numb
                 <span className="num">{c.code}</span>
                 {c.isCarryOver ? (
                   <span className="bg-warning-soft ml-2 rounded px-1.5 py-0.5 text-xs font-semibold">Carry-over</span>
+                ) : null}
+                {c.attempt > 1 ? (
+                  <span className="bg-muted ml-2 rounded px-1.5 py-0.5 text-xs font-semibold">
+                    Attempt <span className="num">{c.attempt}</span>
+                  </span>
                 ) : null}
               </p>
               <p className="text-muted-foreground truncate text-sm">{c.name}</p>
@@ -81,7 +134,7 @@ function Sitting({ sitting, decimals }: { sitting: ResultSitting; decimals: numb
       </ul>
 
       {/* md+: real table */}
-      <table className="hidden w-full table-fixed border-y text-left text-sm md:table">
+      <table className="hidden w-full table-fixed text-left text-sm md:table">
         <thead className="text-muted-foreground bg-muted/50 text-xs">
           <tr>
             <th className="w-32 px-4 py-2.5 font-semibold">Code</th>
@@ -101,6 +154,14 @@ function Sitting({ sitting, decimals }: { sitting: ResultSitting; decimals: numb
                 {c.isCarryOver ? (
                   <span className="bg-warning-soft ml-2 rounded px-1.5 py-0.5 font-sans text-xs font-semibold">CO</span>
                 ) : null}
+                {c.attempt > 1 ? (
+                  <span
+                    className="bg-muted ml-2 rounded px-1.5 py-0.5 font-sans text-xs font-semibold"
+                    title={`Attempt ${c.attempt}`}
+                  >
+                    ×{c.attempt}
+                  </span>
+                ) : null}
               </td>
               <td className="py-3 pr-3">{c.name}</td>
               <td className="num py-3 text-right">{c.credit}</td>
@@ -114,7 +175,75 @@ function Sitting({ sitting, decimals }: { sitting: ResultSitting; decimals: numb
           ))}
         </tbody>
       </table>
+        </div>
+      ) : null}
     </section>
+  );
+}
+
+type SessionGroup = { key: string; name: string; sittings: ResultSitting[] };
+
+/** Newest session first; within a session, the API's order (first semester first). */
+function groupBySession(sittings: ResultSitting[]): SessionGroup[] {
+  const groups = new Map<string, SessionGroup>();
+  sittings.forEach((s) => {
+    const key = s.session?.id ?? "none";
+    if (!groups.has(key)) groups.set(key, { key, name: s.session?.name ?? "Session not recorded", sittings: [] });
+    groups.get(key)!.sittings.push(s);
+  });
+  return [...groups.values()].reverse();
+}
+
+/** Every sitting, grouped by session, with a session filter once there's more than one. */
+function SessionResults({ sittings, decimals }: { sittings: ResultSitting[]; decimals: number }) {
+  const groups = useMemo(() => groupBySession(sittings), [sittings]);
+  const [filter, setFilter] = useState("all");
+  const shown = filter === "all" ? groups : groups.filter((g) => g.key === filter);
+  const latest = sittings[sittings.length - 1];
+
+  return (
+    <div className="flex flex-col gap-5">
+      {groups.length > 1 ? (
+        <div
+          role="group"
+          aria-label="Filter by session"
+          className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:px-0"
+        >
+          {[{ key: "all", name: "All sessions" }, ...groups].map((g) => (
+            <button
+              key={g.key}
+              type="button"
+              aria-pressed={filter === g.key}
+              onClick={() => setFilter(g.key)}
+              className={cn(
+                "num h-9 shrink-0 rounded-full border px-4 text-sm font-semibold whitespace-nowrap transition-colors",
+                filter === g.key
+                  ? "bg-primary text-primary-foreground border-transparent"
+                  : "bg-card text-muted-foreground hover:text-foreground",
+              )}
+            >
+              {g.name}
+            </button>
+          ))}
+        </div>
+      ) : null}
+
+      {shown.map((g) => (
+        <section key={g.key} aria-labelledby={`session-${g.key}`} className="flex flex-col gap-3">
+          <h3 id={`session-${g.key}`} className="num text-muted-foreground text-sm font-bold tracking-wide uppercase">
+            {g.name} session
+          </h3>
+          {g.sittings.map((sitting) => (
+            <Sitting
+              key={`${g.key}-${sitting.semester}-${filter}`}
+              sitting={sitting}
+              decimals={decimals}
+              defaultOpen={sitting === latest || filter !== "all"}
+            />
+          ))}
+        </section>
+      ))}
+    </div>
   );
 }
 
@@ -197,11 +326,7 @@ function ResultsTab() {
         </section>
       ) : null}
 
-      <div className="flex flex-col gap-4">
-        {[...sittings].reverse().map((sitting) => (
-          <Sitting key={`${sitting.session?.id}-${sitting.semester}`} sitting={sitting} decimals={decimals} />
-        ))}
-      </div>
+      <SessionResults sittings={sittings} decimals={decimals} />
     </div>
   );
 }

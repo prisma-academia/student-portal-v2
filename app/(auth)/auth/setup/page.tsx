@@ -7,17 +7,20 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PasswordInput } from "@/components/ui/password-input";
 import {
   clearSetupTransfer,
   readSetupTransfer,
 } from "@/lib/auth-transfer";
 import { setupAccountFormData } from "@/lib/api/student";
 import { unwrapData } from "@/lib/api/client";
+import { navProgress, useNavPending } from "@/lib/nav-progress";
 import { useAuthStore } from "@/stores/auth-store";
 import type { Student } from "@/types/student";
 
 export default function SetupPage() {
   const router = useRouter();
+  const leaving = useNavPending();
   const logIn = useAuthStore((s) => s.logIn);
   const [transfer, setTransfer] = useState<ReturnType<
     typeof readSetupTransfer
@@ -90,6 +93,7 @@ export default function SetupPage() {
         refreshToken: payload.refreshToken ?? "",
       });
       toast.success("Account activated");
+      navProgress.start();
       router.replace("/");
     },
     onError: (e: Error) => toast.error(e.message),
@@ -118,9 +122,8 @@ export default function SetupPage() {
       >
         <div className="flex flex-col gap-2">
           <Label htmlFor="currentPassword">Current password</Label>
-          <Input
+          <PasswordInput
             id="currentPassword"
-            type="password"
             autoComplete="current-password"
             required
             className="min-h-11"
@@ -132,9 +135,8 @@ export default function SetupPage() {
         </div>
         <div className="flex flex-col gap-2">
           <Label htmlFor="newPassword">New password</Label>
-          <Input
+          <PasswordInput
             id="newPassword"
-            type="password"
             autoComplete="new-password"
             required
             className="min-h-11"
@@ -146,9 +148,8 @@ export default function SetupPage() {
         </div>
         <div className="flex flex-col gap-2">
           <Label htmlFor="confirmPassword">Confirm new password</Label>
-          <Input
+          <PasswordInput
             id="confirmPassword"
-            type="password"
             autoComplete="new-password"
             required
             className="min-h-11"
@@ -185,9 +186,9 @@ export default function SetupPage() {
         <Button
           type="submit"
           className="min-h-11"
-          disabled={mutation.isPending}
+          loading={mutation.isPending || leaving}
         >
-          {mutation.isPending ? "Saving…" : "Complete setup"}
+          {mutation.isPending ? "Saving…" : leaving ? "Opening…" : "Complete setup"}
         </Button>
       </form>
     </div>

@@ -6,12 +6,14 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PasswordInput } from "@/components/ui/password-input";
 import { resetPassword } from "@/lib/api/student";
+import { navProgress, useNavPending } from "@/lib/nav-progress";
 
 function ResetPasswordForm() {
   const router = useRouter();
+  const leaving = useNavPending();
   const searchParams = useSearchParams();
   const token = searchParams.get("token") ?? "";
   const [password, setPassword] = useState("");
@@ -27,6 +29,7 @@ function ResetPasswordForm() {
     },
     onSuccess: () => {
       toast.success("Password reset. You can sign in.");
+      navProgress.start();
       router.replace("/auth/sign-in");
     },
     onError: (e: Error) => toast.error(e.message),
@@ -50,9 +53,8 @@ function ResetPasswordForm() {
     >
       <div className="flex flex-col gap-2">
         <Label htmlFor="password">New password</Label>
-        <Input
+        <PasswordInput
           id="password"
-          type="password"
           autoComplete="new-password"
           required
           className="min-h-11"
@@ -62,9 +64,8 @@ function ResetPasswordForm() {
       </div>
       <div className="flex flex-col gap-2">
         <Label htmlFor="confirm">Confirm password</Label>
-        <Input
+        <PasswordInput
           id="confirm"
-          type="password"
           autoComplete="new-password"
           required
           className="min-h-11"
@@ -75,9 +76,9 @@ function ResetPasswordForm() {
       <Button
         type="submit"
         className="min-h-11"
-        disabled={mutation.isPending}
+        loading={mutation.isPending || leaving}
       >
-        {mutation.isPending ? "Saving…" : "Reset password"}
+        {mutation.isPending ? "Saving…" : leaving ? "Opening…" : "Reset password"}
       </Button>
       <Link
         href="/auth/sign-in"

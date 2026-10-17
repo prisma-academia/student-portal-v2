@@ -1,45 +1,35 @@
 "use client";
 
-import { IconDownload, IconLoader2 } from "@tabler/icons-react";
+import { IconFileTypePdf } from "@tabler/icons-react";
 import { useState, type ComponentProps, type ReactNode } from "react";
-import { toast } from "sonner";
+import { PdfViewer } from "@/components/system/pdf-viewer";
 import { Button } from "@/components/ui/button";
-import { openPdf } from "@/lib/api/download";
 
-/** A button that downloads an authenticated PDF, with a spinner and real errors. */
+/** A button that opens an authenticated PDF in the in-app viewer (with Download there). */
 export function PdfButton({
   endpoint,
   filename,
+  title,
   children,
   icon,
   ...props
-}: Omit<ComponentProps<typeof Button>, "onClick"> & {
+}: Omit<ComponentProps<typeof Button>, "onClick" | "title"> & {
   endpoint: string;
   filename: string;
+  /** Viewer heading; defaults to the button's text when that's a plain string. */
+  title?: string;
   children: ReactNode;
   icon?: ReactNode;
 }) {
-  const [busy, setBusy] = useState(false);
+  const [open, setOpen] = useState(false);
+  const heading = title ?? (typeof children === "string" ? children : "Document");
   return (
-    <Button
-      type="button"
-      variant="outline"
-      {...props}
-      disabled={busy || props.disabled}
-      aria-busy={busy}
-      onClick={async () => {
-        setBusy(true);
-        try {
-          await openPdf(endpoint, filename);
-        } catch (e) {
-          toast.error(e instanceof Error ? e.message : "Download failed. Try again.");
-        } finally {
-          setBusy(false);
-        }
-      }}
-    >
-      {busy ? <IconLoader2 className="animate-spin" /> : (icon ?? <IconDownload />)}
-      {children}
-    </Button>
+    <>
+      <Button type="button" variant="outline" {...props} onClick={() => setOpen(true)}>
+        {icon ?? <IconFileTypePdf />}
+        {children}
+      </Button>
+      <PdfViewer open={open} onOpenChange={setOpen} endpoint={endpoint} filename={filename} title={heading} />
+    </>
   );
 }

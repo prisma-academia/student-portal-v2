@@ -1,11 +1,15 @@
+"use client"
+
 import * as React from "react"
+import { IconLoader2 } from "@tabler/icons-react"
 import { cva, type VariantProps } from "class-variance-authority"
+import { useLinkStatus } from "next/link"
 import { Slot } from "radix-ui"
 
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "group/button inline-flex shrink-0 items-center justify-center rounded-[var(--radius-md)] border border-transparent bg-clip-padding text-sm font-semibold whitespace-nowrap transition-[background-color,color,box-shadow,transform] duration-200 ease-[var(--ease-out-expo)] outline-none select-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30 active:not-aria-[haspopup]:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-2 aria-invalid:ring-destructive/20 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+  "group/button inline-flex shrink-0 items-center justify-center rounded-[var(--radius-md)] border border-transparent bg-clip-padding text-sm font-semibold whitespace-nowrap transition-[background-color,color,box-shadow,transform] duration-200 ease-[var(--ease-out-expo)] outline-none select-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30 active:not-aria-[haspopup]:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-2 aria-invalid:ring-destructive/20 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&:has(>.btn-spinner)>svg:not(.btn-spinner)]:hidden aria-busy:cursor-progress [&_svg:not([class*='size-'])]:size-4",
   {
     variants: {
       variant: {
@@ -40,26 +44,53 @@ const buttonVariants = cva(
   }
 )
 
+function Spinner() {
+  return <IconLoader2 className="btn-spinner animate-spin" aria-hidden />
+}
+
+/** Inside an asChild <Link>: spins from the tap until the route lands. */
+function LinkPendingSpinner() {
+  const { pending } = useLinkStatus()
+  return pending ? <Spinner /> : null
+}
+
 function Button({
   className,
   variant = "default",
   size = "default",
   asChild = false,
+  loading = false,
+  disabled,
+  children,
   ...props
 }: React.ComponentProps<"button"> &
   VariantProps<typeof buttonVariants> & {
     asChild?: boolean
+    /** Shows a spinner in place of the icon, disables the button and sets aria-busy. */
+    loading?: boolean
   }) {
-  const Comp = asChild ? Slot.Root : "button"
+  const shared = {
+    "data-slot": "button",
+    "data-variant": variant,
+    "data-size": size,
+    className: cn(buttonVariants({ variant, size, className })),
+    "aria-busy": loading || undefined,
+  }
+
+  if (asChild) {
+    return (
+      <Slot.Root {...shared} {...props}>
+        <LinkPendingSpinner />
+        <Slot.Slottable>{children}</Slot.Slottable>
+      </Slot.Root>
+    )
+  }
 
   return (
-    <Comp
-      data-slot="button"
-      data-variant={variant}
-      data-size={size}
-      className={cn(buttonVariants({ variant, size, className }))}
-      {...props}
-    />
+    <button {...shared} disabled={disabled || loading} {...props}>
+      {loading ? <Spinner /> : null}
+      {children}
+    </button>
   )
 }
 

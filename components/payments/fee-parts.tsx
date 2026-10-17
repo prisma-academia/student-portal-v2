@@ -1,7 +1,8 @@
 "use client";
 
-import { IconChevronRight, IconCreditCard, IconLoader2, IconReceipt } from "@tabler/icons-react";
+import { IconChevronRight, IconCreditCard, IconReceipt } from "@tabler/icons-react";
 import { useMutation } from "@tanstack/react-query";
+import { useEffect } from "react";
 import { toast } from "sonner";
 import { PdfButton } from "@/components/system/pdf-button";
 import { ResponsiveSheet } from "@/components/system/responsive-sheet";
@@ -13,9 +14,13 @@ import { isOverdue } from "@/lib/queries";
 import { cn } from "@/lib/utils";
 import type { Fee } from "@/types/student";
 
-/** Start a Paystack checkout for a fee and hand the browser to the gateway. */
+/**
+ * Start a Paystack checkout for a fee and hand the browser to the gateway.
+ * `busy` stays true after the API answers, while Paystack loads, so the
+ * button doesn't fall back to idle mid-redirect.
+ */
 export function usePayFee() {
-  return useMutation({
+  const m = useMutation({
     mutationFn: async (feeId: string) => {
       const res = await initializePayment(feeId);
       if (!res.ok) throw new Error(res.message);
@@ -28,6 +33,16 @@ export function usePayFee() {
     },
     onError: (e: Error) => toast.error(e.message),
   });
+  const { reset } = m;
+  useEffect(() => {
+    // Back from Paystack restores this page from the back/forward cache: un-stick the button.
+    const onShow = (e: PageTransitionEvent) => {
+      if (e.persisted) reset();
+    };
+    window.addEventListener("pageshow", onShow);
+    return () => window.removeEventListener("pageshow", onShow);
+  }, [reset]);
+  return { ...m, busy: m.isPending || m.isSuccess };
 }
 
 export function feeStatus(fee: Fee) {
@@ -99,8 +114,9 @@ export function FeeSheet({
                 endpoint={pdfPaths.receipt(fee.userPayment._id)}
                 filename={`receipt-${fee.userPayment.reference ?? fee._id}`}
                 icon={<IconReceipt />}
+                title={`Receipt · ${fee.name}`}
               >
-                Download receipt
+                View receipt
               </PdfButton>
             ) : (
               <p className="text-muted-foreground text-sm">The receipt isn&apos;t available yet. Check back shortly.</p>
@@ -109,11 +125,11 @@ export function FeeSheet({
             <Button
               size="lg"
               className="w-full sm:w-auto"
-              disabled={pay.isPending}
+              loading={pay.busy}
               onClick={() => pay.mutate(fee._id)}
             >
-              {pay.isPending ? <IconLoader2 className="animate-spin" /> : <IconCreditCard />}
-              {pay.isPending ? "Opening Paystack…" : `Pay ${formatNaira(fee.amount)}`}
+              <IconCreditCard />
+              {pay.busy ? "Opening Paystack…" : `Pay ${formatNaira(fee.amount)}`}
             </Button>
           )
         ) : null

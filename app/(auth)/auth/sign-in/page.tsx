@@ -1,6 +1,5 @@
 "use client";
 
-import { IconEye, IconEyeOff, IconLoader2 } from "@tabler/icons-react";
 import { useMutation } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -10,11 +9,13 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PasswordInput, stripWhitespace } from "@/components/ui/password-input";
 import {
   saveChangePasswordTransfer,
   saveSetupTransfer,
 } from "@/lib/auth-transfer";
 import { login, type LoginBody } from "@/lib/api/student";
+import { navProgress, useNavPending } from "@/lib/nav-progress";
 import { useAuthStore } from "@/stores/auth-store";
 import type { Student } from "@/types/student";
 
@@ -35,7 +36,7 @@ export default function SignInPage() {
   const logIn = useAuthStore((s) => s.logIn);
   const token = useAuthStore((s) => s.token);
   const hydrated = useAuthStore((s) => s._hasHydrated);
-  const [showPassword, setShowPassword] = useState(false);
+  const leaving = useNavPending();
   const [remember, setRemember] = useState(false);
 
   useEffect(() => {
@@ -58,6 +59,7 @@ export default function SignInPage() {
           token: inner.token,
           refreshToken: inner.refreshToken ?? "",
         });
+        navProgress.start();
         router.push("/auth/setup");
         return;
       }
@@ -67,11 +69,13 @@ export default function SignInPage() {
           token: inner.token,
           refreshToken: inner.refreshToken ?? "",
         });
+        navProgress.start();
         router.push("/auth/change-password");
         return;
       }
       if (inner?.student && inner.token) {
         toast.success("Signed in");
+        navProgress.start();
         logIn({
           user: inner.student,
           token: inner.token,
@@ -94,7 +98,7 @@ export default function SignInPage() {
       return;
     }
     const isEmail = loginId.includes("@");
-    const password = String(fd.get("password") ?? "");
+    const password = stripWhitespace(String(fd.get("password") ?? ""));
     mutation.mutate(
       isEmail
         ? { email: loginId, password, persistent: remember }
@@ -133,25 +137,7 @@ export default function SignInPage() {
               Forgot password?
             </Link>
           </div>
-          <div className="relative">
-            <Input
-              id="password"
-              name="password"
-              type={showPassword ? "text" : "password"}
-              autoComplete="current-password"
-              required
-              className="pr-12"
-            />
-            <button
-              type="button"
-              aria-label={showPassword ? "Hide password" : "Show password"}
-              aria-pressed={showPassword}
-              className="text-muted-foreground hover:text-foreground absolute inset-y-0 right-0 grid w-12 place-items-center rounded-r-[var(--radius-md)]"
-              onClick={() => setShowPassword((v) => !v)}
-            >
-              {showPassword ? <IconEyeOff className="size-5" /> : <IconEye className="size-5" />}
-            </button>
-          </div>
+          <PasswordInput id="password" name="password" autoComplete="current-password" required />
         </div>
         <label className="flex min-h-10 cursor-pointer items-center gap-2.5 text-sm">
           <Checkbox
@@ -161,9 +147,8 @@ export default function SignInPage() {
           />
           Keep me signed in on this device
         </label>
-        <Button type="submit" size="lg" className="mt-1 w-full" disabled={mutation.isPending}>
-          {mutation.isPending ? <IconLoader2 className="animate-spin" /> : null}
-          {mutation.isPending ? "Signing in…" : "Sign in"}
+        <Button type="submit" size="lg" className="mt-1 w-full" loading={mutation.isPending || leaving}>
+          {mutation.isPending ? "Signing in…" : leaving ? "Opening your portal…" : "Sign in"}
         </Button>
       </form>
       <p className="text-muted-foreground text-center text-sm">

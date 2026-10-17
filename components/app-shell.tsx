@@ -16,6 +16,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { SchoolLogo } from "@/components/brand/school-logo";
 import { StudentAvatar } from "@/components/student/student-avatar";
+import { NavPendingPill } from "@/components/system/nav-progress";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -29,6 +30,7 @@ import {
 import { getConfig } from "@/lib/config";
 import { displayName, fullName } from "@/lib/format";
 import { NAV, isActive } from "@/lib/nav";
+import { navProgress } from "@/lib/nav-progress";
 import { splitFees, useFees, useStudent } from "@/lib/queries";
 import {
   applyThemePreference,
@@ -55,6 +57,7 @@ function ProfileMenu() {
   const name = displayName(fullName(student?.personalInfo)) || "Student";
 
   const signOut = () => {
+    navProgress.start();
     logOut();
     queryClient.clear();
     router.replace("/auth/sign-in");
@@ -184,7 +187,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                       className="bg-primary-soft absolute inset-0 -z-10 rounded-full"
                       transition={{ type: "spring", stiffness: 420, damping: 34 }}
                     />
-                  ) : null}
+                  ) : (
+                    <NavPendingPill className="-z-10" />
+                  )}
                   <Icon className="size-[1.125rem]" aria-hidden />
                   {item.label}
                   {item.href === "/payments" ? <CountBadge count={unpaid} /> : null}
@@ -231,7 +236,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                         className="bg-primary-soft absolute inset-0 rounded-full"
                         transition={{ type: "spring", stiffness: 420, damping: 34 }}
                       />
-                    ) : null}
+                    ) : (
+                      <NavPendingPill />
+                    )}
                     <Icon className="relative size-[1.375rem]" stroke={active ? 2.2 : 1.8} aria-hidden />
                     {item.href === "/payments" ? (
                       <CountBadge count={unpaid} className="absolute -top-1 right-1.5 ring-2 ring-[var(--card)]" />

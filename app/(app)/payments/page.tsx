@@ -1,6 +1,6 @@
 "use client";
 
-import { IconCircleCheck, IconCreditCard, IconLoader2, IconReceipt2 } from "@tabler/icons-react";
+import { IconCircleCheck, IconCreditCard, IconReceipt2 } from "@tabler/icons-react";
 import { useState } from "react";
 import { FeeRow, FeeSheet, usePayFee } from "@/components/payments/fee-parts";
 import { EmptyState } from "@/components/system/empty-state";
@@ -52,11 +52,11 @@ function Statement({ fees }: { fees: Fee[] }) {
         <Button
           size="lg"
           className="mt-4 w-full sm:w-auto"
-          disabled={pay.isPending}
+          loading={pay.busy}
           onClick={() => pay.mutate(next._id)}
         >
-          {pay.isPending ? <IconLoader2 className="animate-spin" /> : <IconCreditCard />}
-          {pay.isPending ? "Opening Paystack…" : `Pay ${formatNaira(next.amount)} now`}
+          <IconCreditCard />
+          {pay.busy ? "Opening Paystack…" : `Pay ${formatNaira(next.amount)} now`}
         </Button>
       ) : null}
       {paid.length ? (

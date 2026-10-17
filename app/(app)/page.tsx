@@ -8,7 +8,6 @@ import {
   IconClipboardList,
   IconCreditCard,
   IconFileCertificate,
-  IconLoader2,
   IconUserExclamation,
 } from "@tabler/icons-react";
 import Link from "next/link";
@@ -131,11 +130,10 @@ function NeedsAttention({ onOpenFee }: { onOpenFee: (f: Fee) => void }) {
           <div className="flex gap-2">
             <Button
               className="flex-1 sm:flex-none"
-              disabled={pay.isPending}
+              loading={pay.busy}
               onClick={() => (outstanding.length === 1 && next ? pay.mutate(next._id) : onOpenFee(next!))}
             >
-              {pay.isPending ? <IconLoader2 className="animate-spin" /> : null}
-              {outstanding.length === 1 ? `Pay ${formatNaira(next?.amount)}` : "Pay next fee"}
+              {pay.busy ? "Opening Paystack…" : outstanding.length === 1 ? `Pay ${formatNaira(next?.amount)}` : "Pay next fee"}
             </Button>
             <Button asChild variant="outline" className="flex-1 sm:flex-none">
               <Link href="/payments">All fees</Link>

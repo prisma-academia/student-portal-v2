@@ -8,15 +8,18 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PasswordInput } from "@/components/ui/password-input";
 import {
   clearChangePasswordTransfer,
   readChangePasswordTransfer,
 } from "@/lib/auth-transfer";
 import { changePassword } from "@/lib/api/student";
+import { navProgress, useNavPending } from "@/lib/nav-progress";
 import { useAuthStore } from "@/stores/auth-store";
 
 export default function ChangePasswordPage() {
   const router = useRouter();
+  const leaving = useNavPending();
   const logIn = useAuthStore((s) => s.logIn);
   const user = useAuthStore((s) => s.user);
   const [email, setEmail] = useState("");
@@ -72,6 +75,7 @@ export default function ChangePasswordPage() {
           refreshToken: t.refreshToken ?? "",
         });
       }
+      navProgress.start();
       router.replace("/");
     },
     onError: (e: Error) => toast.error(e.message),
@@ -124,9 +128,8 @@ export default function ChangePasswordPage() {
         ) : null}
         <div className="flex flex-col gap-2">
           <Label htmlFor="currentPassword">Current password</Label>
-          <Input
+          <PasswordInput
             id="currentPassword"
-            type="password"
             autoComplete="current-password"
             required
             className="min-h-11"
@@ -136,9 +139,8 @@ export default function ChangePasswordPage() {
         </div>
         <div className="flex flex-col gap-2">
           <Label htmlFor="newPassword">New password</Label>
-          <Input
+          <PasswordInput
             id="newPassword"
-            type="password"
             autoComplete="new-password"
             required
             className="min-h-11"
@@ -148,9 +150,8 @@ export default function ChangePasswordPage() {
         </div>
         <div className="flex flex-col gap-2">
           <Label htmlFor="confirmPassword">Confirm new password</Label>
-          <Input
+          <PasswordInput
             id="confirmPassword"
-            type="password"
             autoComplete="new-password"
             required
             className="min-h-11"
@@ -161,9 +162,9 @@ export default function ChangePasswordPage() {
         <Button
           type="submit"
           className="min-h-11"
-          disabled={mutation.isPending}
+          loading={mutation.isPending || leaving}
         >
-          {mutation.isPending ? "Saving…" : "Change password"}
+          {mutation.isPending ? "Saving…" : leaving ? "Opening…" : "Change password"}
         </Button>
         {signedIn ? (
           <Button asChild variant="ghost" className="min-h-11">
