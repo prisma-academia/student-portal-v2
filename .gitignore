@@ -31,9 +31,8 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
-.env*
-!.env.example
+# env: .env holds only public NEXT_PUBLIC_* values and is committed; keep overrides in .env*.local
+.env*.local
 
 # vercel
 .vercel

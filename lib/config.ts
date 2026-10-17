@@ -20,7 +20,7 @@ function stripQuotes(v: string): string {
 function required(raw: string | undefined, key: string): string {
   if (raw == null || String(raw).trim() === "") {
     throw new Error(
-      `[config] Missing required env: ${key}. Copy .env.example to .env.local and set it.`,
+      `[config] Missing required env: ${key}. Set it in .env (or .env.local / your host's environment variables).`,
     );
   }
   return stripQuotes(String(raw).trim());

@@ -9,13 +9,13 @@ The student-facing web app for Prisma Academia schools. Students sign in with th
 - **Resources**: documents shared with everyone or with the student's class.
 - **Profile** (from the avatar menu at the top right): contact and next-of-kin details, change password, light/dark appearance.
 
-One codebase is deployed per school, configured by four env vars (see `.env.example`): `NEXT_PUBLIC_API_BASE_URL`, `NEXT_PUBLIC_APP_NAME`, `NEXT_PUBLIC_LOGO_URL` and `NEXT_PUBLIC_PRIMARY_COLOR`. Titles, alt text, favicon and theme colour derive from these. The primary colour drives the whole palette, including calendar tints, and the text colour placed on it is chosen for contrast (`lib/color.ts`).
+One codebase is deployed per school, configured by four env vars in the committed `.env`: `NEXT_PUBLIC_API_BASE_URL`, `NEXT_PUBLIC_APP_NAME`, `NEXT_PUBLIC_LOGO_URL` and `NEXT_PUBLIC_PRIMARY_COLOR`. Titles, alt text, favicon and theme colour derive from these. The primary colour drives the whole palette, including calendar tints, and the text colour placed on it is chosen for contrast (`lib/color.ts`).
 
 ## Run
 
 ```bash
 npm install
-cp .env.example .env.local   # then set the school's values
+# .env already holds the default school; another school overrides it in .env.local
 npm run dev                  # http://localhost:3000
 ```
 
