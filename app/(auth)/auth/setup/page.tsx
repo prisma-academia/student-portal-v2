@@ -104,8 +104,8 @@ export default function SetupPage() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="text-lg font-semibold">Activate account</h1>
-        <p className="text-muted-foreground mt-1 text-xs">
+        <h1 className="text-2xl font-extrabold">Activate account</h1>
+        <p className="text-muted-foreground mt-1 text-sm">
           Set your password and date of birth, and add a profile photo.
         </p>
       </div>

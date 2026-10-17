@@ -1,7 +1,9 @@
 import type {
   AcademicSummary,
+  CourseFormAvailability,
   Fee,
   Memo,
+  SchoolEvent,
   Student,
   StudentDocument,
 } from "@/types/student";
@@ -13,8 +15,6 @@ import {
   apiPostPublicFormData,
   unwrapData,
 } from "@/lib/api/client";
-import { getConfig } from "@/lib/config";
-import { useAuthStore } from "@/stores/auth-store";
 
 export type LoginBody =
   | { email: string; password: string; persistent?: boolean }
@@ -30,10 +30,6 @@ export type LoginResponse = {
 
 export async function login(body: LoginBody) {
   return apiPostPublic<LoginResponse>("/api/v1/student/login", body);
-}
-
-export async function setupAccountJson(body: Record<string, unknown>) {
-  return apiPostPublic<unknown>("/api/v1/student/setup", body);
 }
 
 export async function setupAccountFormData(formData: FormData) {
@@ -82,6 +78,7 @@ export async function fetchMe() {
 export async function patchMe(payload: {
   personalInfo?: Student["personalInfo"];
   contactInfo?: Student["contactInfo"];
+  guardianInfo?: Student["guardianInfo"];
 }) {
   const res = await apiPatch<unknown>("/api/v1/student/me", payload);
   if (!res.ok) return res;
@@ -94,8 +91,8 @@ export async function patchMe(payload: {
 export async function fetchEvents() {
   const res = await apiGet<unknown>("/api/v1/student/me/events");
   if (!res.ok) return res;
-  const list = unwrapData<unknown[]>(res.data);
-  return { ...res, data: list } as typeof res & { data: unknown[] };
+  const list = unwrapData<SchoolEvent[]>(res.data);
+  return { ...res, data: list } as typeof res & { data: SchoolEvent[] };
 }
 
 export async function fetchMemos() {
@@ -135,22 +132,24 @@ export async function verifyPayment(reference: string) {
   return apiPostPublic<unknown>("/api/v1/payment/verify", { reference });
 }
 
-export function receiptPdfUrl(paymentId: string): string {
-  const { baseUrl } = getConfig();
-  const token = useAuthStore.getState().token;
-  const q = token ? `?token=${encodeURIComponent(token)}` : "";
-  return `${baseUrl}/api/v1/student/me/receipt/${paymentId}${q}`;
-}
+/** Paths for authenticated PDF downloads; open them with openPdf() (lib/api/download.ts). */
+export const pdfPaths = {
+  receipt: (paymentId: string) => `/api/v1/student/me/receipt/${paymentId}`,
+  courseForm: (semester: string, yearId: string) =>
+    `/api/v1/student/me/course-form?${new URLSearchParams({ semester, yearId })}`,
+  resultSlip: (semester: string, yearId: string) =>
+    `/api/v1/student/me/results?${new URLSearchParams({ semester, yearId })}`,
+  transcript: () => "/api/v1/student/me/transcript",
+};
 
-export function courseFormPdfUrl(semester: string, yearId: string): string {
-  const { baseUrl } = getConfig();
-  const token = useAuthStore.getState().token;
-  const params = new URLSearchParams({
-    semester,
-    yearId,
-    ...(token ? { token } : {}),
-  });
-  return `${baseUrl}/api/v1/course/forms?${params.toString()}`;
+/** Which level + semester course forms have courses (and can be printed). */
+export async function fetchCourseFormSummary() {
+  const res = await apiGet<unknown>("/api/v1/student/me/course-form-summary");
+  if (!res.ok) return res;
+  const inner = unwrapData<{ items?: CourseFormAvailability[] }>(res.data);
+  return { ...res, data: inner?.items ?? [] } as typeof res & {
+    data: CourseFormAvailability[];
+  };
 }
 
 /** Published results: sittings, GPA, CGPA, class of award, outstanding courses. */
@@ -161,22 +160,4 @@ export async function fetchResultsSummary() {
   return { ...res, data: summary as unknown } as typeof res & {
     data: AcademicSummary;
   };
-}
-
-export function transcriptPdfUrl(): string {
-  const { baseUrl } = getConfig();
-  const token = useAuthStore.getState().token;
-  const params = new URLSearchParams(token ? { token } : {});
-  return `${baseUrl}/api/v1/student/me/transcript?${params.toString()}`;
-}
-
-export function resultsPdfUrl(semester: string, yearId: string): string {
-  const { baseUrl } = getConfig();
-  const token = useAuthStore.getState().token;
-  const params = new URLSearchParams({
-    semester,
-    yearId,
-    ...(token ? { token } : {}),
-  });
-  return `${baseUrl}/api/v1/student/results?${params.toString()}`;
 }

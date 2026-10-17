@@ -51,6 +51,12 @@ Source: `student-portal/src/configs.js`.
   - `VITE_CALENDAR_GENERAL_BG`
   - `VITE_CALENDAR_GENERAL_HOVER`
 
+> **student-portal-v2 needs only four:** `NEXT_PUBLIC_API_BASE_URL`, `NEXT_PUBLIC_APP_NAME`,
+> `NEXT_PUBLIC_LOGO_URL`, `NEXT_PUBLIC_PRIMARY_COLOR` (see `.env.example` and `lib/config.ts`).
+> Short name, page title, logo alt, favicon, theme/manifest colours and the footer derive from
+> them; the auth background images and the six calendar colours were dropped (the login uses
+> the animated mesh, and calendar categories use tints of the brand palette).
+
 ## Auth & session model
 
 ### Stored state (persistent)

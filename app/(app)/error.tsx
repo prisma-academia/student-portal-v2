@@ -1,9 +1,10 @@
 "use client";
 
-import { IconRefresh } from "@tabler/icons-react";
+import { IconHome } from "@tabler/icons-react";
+import Link from "next/link";
 import { useEffect } from "react";
+import { QueryErrorPanel } from "@/components/system/query-error-panel";
 import { Button } from "@/components/ui/button";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export default function AppError({
   error,
@@ -19,16 +20,16 @@ export default function AppError({
   }, [error]);
 
   return (
-    <div className="flex flex-1 flex-col items-start gap-4 p-1">
-      <Alert variant="destructive" className="max-w-lg">
-        <AlertTitle>This page failed to load</AlertTitle>
-        <AlertDescription className="mt-2">
-          {error.message || "An unexpected error occurred."}
-        </AlertDescription>
-      </Alert>
-      <Button type="button" variant="outline" size="sm" onClick={reset}>
-        <IconRefresh className="size-4" />
-        Try again
+    <div className="mx-auto flex w-full max-w-lg flex-col gap-4 py-6">
+      <QueryErrorPanel
+        message={error.message || "This page hit an unexpected problem."}
+        onRetry={reset}
+      />
+      <Button asChild variant="ghost" className="self-start">
+        <Link href="/">
+          <IconHome />
+          Back to home
+        </Link>
       </Button>
     </div>
   );

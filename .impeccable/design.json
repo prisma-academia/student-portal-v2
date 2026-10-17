@@ -1,0 +1,753 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-17T08:13:25.780Z",
+  "title": "Design System: Student Portal",
+  "extensions": {
+    "tenancy": {
+      "source": "NEXT_PUBLIC_PRIMARY_COLOR is written as --primary on <html> by app/layout.tsx; --primary-foreground comes from foregroundOn() in lib/color.ts (#ffffff unless #1f1a17 reads better).",
+      "fallbackPrimary": "#b42318",
+      "note": "approxForFallback values resolve relational tokens against the fallback primary only. The color-mix() expressions in DESIGN.md frontmatter are normative."
+    },
+    "colorMeta": {
+      "primary": {
+        "role": "primary",
+        "displayName": "School Colour",
+        "canonical": "var(--primary)",
+        "approxForFallback": "#b42318",
+        "tonalRamp": [
+          "oklch(0.15 0.19 29)",
+          "oklch(0.27 0.19 29)",
+          "oklch(0.39 0.19 29)",
+          "oklch(0.51 0.19 29)",
+          "oklch(0.63 0.19 29)",
+          "oklch(0.75 0.19 29)",
+          "oklch(0.86 0.19 29)",
+          "oklch(0.95 0.19 29)"
+        ],
+        "note": "Per tenant. Ramp shown for the fallback school only."
+      },
+      "primary-foreground": {
+        "role": "primary",
+        "displayName": "Contrast-Picked Ink",
+        "canonical": "foregroundOn(var(--primary))",
+        "approxForFallback": "#ffffff",
+        "tonalRamp": [
+          "oklch(0.15 0 0)",
+          "oklch(0.27 0 0)",
+          "oklch(0.39 0 0)",
+          "oklch(0.51 0 0)",
+          "oklch(0.63 0 0)",
+          "oklch(0.75 0 0)",
+          "oklch(0.86 0 0)",
+          "oklch(0.95 0 0)"
+        ]
+      },
+      "primary-soft": {
+        "role": "primary",
+        "displayName": "School Colour Soft",
+        "canonical": "color-mix(in oklch, var(--primary) 10%, var(--card))",
+        "approxForFallback": "oklch(0.95 0.021 70)",
+        "tonalRamp": [
+          "oklch(0.15 0.03 40)",
+          "oklch(0.27 0.03 40)",
+          "oklch(0.39 0.03 40)",
+          "oklch(0.51 0.03 40)",
+          "oklch(0.63 0.03 40)",
+          "oklch(0.75 0.03 40)",
+          "oklch(0.86 0.03 40)",
+          "oklch(0.95 0.03 40)"
+        ]
+      },
+      "primary-ink": {
+        "role": "primary",
+        "displayName": "School Colour Ink",
+        "canonical": "color-mix(in oklch, var(--primary) 78%, oklch(0.2 0.02 40))",
+        "approxForFallback": "oklch(0.45 0.153 31)",
+        "tonalRamp": [
+          "oklch(0.15 0.15 31)",
+          "oklch(0.27 0.15 31)",
+          "oklch(0.39 0.15 31)",
+          "oklch(0.51 0.15 31)",
+          "oklch(0.63 0.15 31)",
+          "oklch(0.75 0.15 31)",
+          "oklch(0.86 0.15 31)",
+          "oklch(0.95 0.15 31)"
+        ]
+      },
+      "id-card-field": {
+        "role": "primary",
+        "displayName": "ID Card Field",
+        "canonical": "color-mix(in oklch, var(--primary) 86%, black)",
+        "approxForFallback": "oklch(0.45 0.163 29)",
+        "tonalRamp": [
+          "oklch(0.15 0.16 29)",
+          "oklch(0.27 0.16 29)",
+          "oklch(0.39 0.16 29)",
+          "oklch(0.51 0.16 29)",
+          "oklch(0.63 0.16 29)",
+          "oklch(0.75 0.16 29)",
+          "oklch(0.86 0.16 29)",
+          "oklch(0.95 0.16 29)"
+        ]
+      },
+      "ring": {
+        "role": "primary",
+        "displayName": "Focus Ring",
+        "canonical": "color-mix(in oklch, var(--primary) 70%, transparent)",
+        "approxForFallback": "oklch(0.52 0.19 29 / 0.7)",
+        "tonalRamp": [
+          "oklch(0.15 0.19 29)",
+          "oklch(0.27 0.19 29)",
+          "oklch(0.39 0.19 29)",
+          "oklch(0.51 0.19 29)",
+          "oklch(0.63 0.19 29)",
+          "oklch(0.75 0.19 29)",
+          "oklch(0.86 0.19 29)",
+          "oklch(0.95 0.19 29)"
+        ]
+      },
+      "paper": {
+        "role": "neutral",
+        "displayName": "Warm Paper",
+        "canonical": "color-mix(in srgb, var(--primary) 1.5%, #faf7f2)",
+        "approxForFallback": "#f9f4ef",
+        "tonalRamp": [
+          "oklch(0.15 0.008 70)",
+          "oklch(0.27 0.008 70)",
+          "oklch(0.39 0.008 70)",
+          "oklch(0.51 0.008 70)",
+          "oklch(0.63 0.008 70)",
+          "oklch(0.75 0.008 70)",
+          "oklch(0.86 0.008 70)",
+          "oklch(0.95 0.008 70)"
+        ]
+      },
+      "card": {
+        "role": "neutral",
+        "displayName": "Card White",
+        "canonical": "oklch(1 0.002 75)",
+        "approxForFallback": "#ffffff",
+        "tonalRamp": [
+          "oklch(0.15 0.004 75)",
+          "oklch(0.27 0.004 75)",
+          "oklch(0.39 0.004 75)",
+          "oklch(0.51 0.004 75)",
+          "oklch(0.63 0.004 75)",
+          "oklch(0.75 0.004 75)",
+          "oklch(0.86 0.004 75)",
+          "oklch(0.95 0.004 75)"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Warm Ink",
+        "canonical": "oklch(0.22 0.012 40)",
+        "approxForFallback": "#1d1715",
+        "tonalRamp": [
+          "oklch(0.15 0.012 40)",
+          "oklch(0.27 0.012 40)",
+          "oklch(0.39 0.012 40)",
+          "oklch(0.51 0.012 40)",
+          "oklch(0.63 0.012 40)",
+          "oklch(0.75 0.012 40)",
+          "oklch(0.86 0.012 40)",
+          "oklch(0.95 0.012 40)"
+        ]
+      },
+      "ink-muted": {
+        "role": "neutral",
+        "displayName": "Muted Ink",
+        "canonical": "oklch(0.47 0.014 45)",
+        "approxForFallback": "#625853",
+        "tonalRamp": [
+          "oklch(0.15 0.014 45)",
+          "oklch(0.27 0.014 45)",
+          "oklch(0.39 0.014 45)",
+          "oklch(0.51 0.014 45)",
+          "oklch(0.63 0.014 45)",
+          "oklch(0.75 0.014 45)",
+          "oklch(0.86 0.014 45)",
+          "oklch(0.95 0.014 45)"
+        ]
+      },
+      "secondary": {
+        "role": "neutral",
+        "displayName": "Linen",
+        "canonical": "color-mix(in srgb, var(--primary) 3%, #f0ece6)",
+        "approxForFallback": "#efe6e0",
+        "tonalRamp": [
+          "oklch(0.15 0.01 65)",
+          "oklch(0.27 0.01 65)",
+          "oklch(0.39 0.01 65)",
+          "oklch(0.51 0.01 65)",
+          "oklch(0.63 0.01 65)",
+          "oklch(0.75 0.01 65)",
+          "oklch(0.86 0.01 65)",
+          "oklch(0.95 0.01 65)"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Linen (muted)",
+        "canonical": "color-mix(in srgb, var(--primary) 2%, #f0ece6)",
+        "approxForFallback": "#efe8e2",
+        "tonalRamp": [
+          "oklch(0.15 0.01 65)",
+          "oklch(0.27 0.01 65)",
+          "oklch(0.39 0.01 65)",
+          "oklch(0.51 0.01 65)",
+          "oklch(0.63 0.01 65)",
+          "oklch(0.75 0.01 65)",
+          "oklch(0.86 0.01 65)",
+          "oklch(0.95 0.01 65)"
+        ]
+      },
+      "hairline": {
+        "role": "neutral",
+        "displayName": "Hairline",
+        "canonical": "oklch(0.9 0.008 70)",
+        "approxForFallback": "#e3ddd6",
+        "tonalRamp": [
+          "oklch(0.15 0.008 70)",
+          "oklch(0.27 0.008 70)",
+          "oklch(0.39 0.008 70)",
+          "oklch(0.51 0.008 70)",
+          "oklch(0.63 0.008 70)",
+          "oklch(0.75 0.008 70)",
+          "oklch(0.86 0.008 70)",
+          "oklch(0.95 0.008 70)"
+        ]
+      },
+      "input-stroke": {
+        "role": "neutral",
+        "displayName": "Input Stroke",
+        "canonical": "oklch(0.88 0.01 70)",
+        "approxForFallback": "#ddd6ce",
+        "tonalRamp": [
+          "oklch(0.15 0.01 70)",
+          "oklch(0.27 0.01 70)",
+          "oklch(0.39 0.01 70)",
+          "oklch(0.51 0.01 70)",
+          "oklch(0.63 0.01 70)",
+          "oklch(0.75 0.01 70)",
+          "oklch(0.86 0.01 70)",
+          "oklch(0.95 0.01 70)"
+        ]
+      },
+      "success": {
+        "role": "state",
+        "displayName": "Paid Green",
+        "canonical": "oklch(0.52 0.12 155)",
+        "approxForFallback": "#2a7d4f",
+        "tonalRamp": [
+          "oklch(0.15 0.12 155)",
+          "oklch(0.27 0.12 155)",
+          "oklch(0.39 0.12 155)",
+          "oklch(0.51 0.12 155)",
+          "oklch(0.63 0.12 155)",
+          "oklch(0.75 0.12 155)",
+          "oklch(0.86 0.12 155)",
+          "oklch(0.95 0.12 155)"
+        ]
+      },
+      "success-soft": {
+        "role": "state",
+        "displayName": "Paid Green Soft",
+        "canonical": "oklch(0.95 0.04 155)",
+        "approxForFallback": "#e0f5e7",
+        "tonalRamp": [
+          "oklch(0.15 0.04 155)",
+          "oklch(0.27 0.04 155)",
+          "oklch(0.39 0.04 155)",
+          "oklch(0.51 0.04 155)",
+          "oklch(0.63 0.04 155)",
+          "oklch(0.75 0.04 155)",
+          "oklch(0.86 0.04 155)",
+          "oklch(0.95 0.04 155)"
+        ]
+      },
+      "warning": {
+        "role": "state",
+        "displayName": "Due Amber",
+        "canonical": "oklch(0.6 0.13 70)",
+        "approxForFallback": "#a8741a",
+        "tonalRamp": [
+          "oklch(0.15 0.13 70)",
+          "oklch(0.27 0.13 70)",
+          "oklch(0.39 0.13 70)",
+          "oklch(0.51 0.13 70)",
+          "oklch(0.63 0.13 70)",
+          "oklch(0.75 0.13 70)",
+          "oklch(0.86 0.13 70)",
+          "oklch(0.95 0.13 70)"
+        ]
+      },
+      "warning-soft": {
+        "role": "state",
+        "displayName": "Due Amber Soft",
+        "canonical": "oklch(0.96 0.05 85)",
+        "approxForFallback": "#fbf0d6",
+        "tonalRamp": [
+          "oklch(0.15 0.05 85)",
+          "oklch(0.27 0.05 85)",
+          "oklch(0.39 0.05 85)",
+          "oklch(0.51 0.05 85)",
+          "oklch(0.63 0.05 85)",
+          "oklch(0.75 0.05 85)",
+          "oklch(0.86 0.05 85)",
+          "oklch(0.95 0.05 85)"
+        ]
+      },
+      "danger": {
+        "role": "state",
+        "displayName": "Overdue Red",
+        "canonical": "oklch(0.55 0.2 27)",
+        "approxForFallback": "#c42b2b",
+        "tonalRamp": [
+          "oklch(0.15 0.2 27)",
+          "oklch(0.27 0.2 27)",
+          "oklch(0.39 0.2 27)",
+          "oklch(0.51 0.2 27)",
+          "oklch(0.63 0.2 27)",
+          "oklch(0.75 0.2 27)",
+          "oklch(0.86 0.2 27)",
+          "oklch(0.95 0.2 27)"
+        ]
+      },
+      "danger-soft": {
+        "role": "state",
+        "displayName": "Overdue Red Soft",
+        "canonical": "oklch(0.95 0.035 25)",
+        "approxForFallback": "#fbe6e3",
+        "tonalRamp": [
+          "oklch(0.15 0.035 25)",
+          "oklch(0.27 0.035 25)",
+          "oklch(0.39 0.035 25)",
+          "oklch(0.51 0.035 25)",
+          "oklch(0.63 0.035 25)",
+          "oklch(0.75 0.035 25)",
+          "oklch(0.86 0.035 25)",
+          "oklch(0.95 0.035 25)"
+        ]
+      },
+      "night-paper": {
+        "role": "neutral",
+        "displayName": "Night Paper",
+        "canonical": "color-mix(in oklch, var(--primary) 4%, oklch(0.17 0.008 40))",
+        "approxForFallback": "oklch(0.184 0.015 39)",
+        "tonalRamp": [
+          "oklch(0.15 0.012 40)",
+          "oklch(0.27 0.012 40)",
+          "oklch(0.39 0.012 40)",
+          "oklch(0.51 0.012 40)",
+          "oklch(0.63 0.012 40)",
+          "oklch(0.75 0.012 40)",
+          "oklch(0.86 0.012 40)",
+          "oklch(0.95 0.012 40)"
+        ]
+      },
+      "night-card": {
+        "role": "neutral",
+        "displayName": "Night Card",
+        "canonical": "color-mix(in oklch, var(--primary) 4%, oklch(0.215 0.009 40))",
+        "approxForFallback": "oklch(0.227 0.016 39)",
+        "tonalRamp": [
+          "oklch(0.15 0.014 40)",
+          "oklch(0.27 0.014 40)",
+          "oklch(0.39 0.014 40)",
+          "oklch(0.51 0.014 40)",
+          "oklch(0.63 0.014 40)",
+          "oklch(0.75 0.014 40)",
+          "oklch(0.86 0.014 40)",
+          "oklch(0.95 0.014 40)"
+        ]
+      },
+      "night-ink": {
+        "role": "neutral",
+        "displayName": "Night Ink",
+        "canonical": "oklch(0.95 0.006 75)",
+        "approxForFallback": "#f2efeb",
+        "tonalRamp": [
+          "oklch(0.15 0.006 75)",
+          "oklch(0.27 0.006 75)",
+          "oklch(0.39 0.006 75)",
+          "oklch(0.51 0.006 75)",
+          "oklch(0.63 0.006 75)",
+          "oklch(0.75 0.006 75)",
+          "oklch(0.86 0.006 75)",
+          "oklch(0.95 0.006 75)"
+        ]
+      },
+      "night-ink-muted": {
+        "role": "neutral",
+        "displayName": "Night Muted Ink",
+        "canonical": "oklch(0.72 0.012 60)",
+        "approxForFallback": "#aaa29b",
+        "tonalRamp": [
+          "oklch(0.15 0.012 60)",
+          "oklch(0.27 0.012 60)",
+          "oklch(0.39 0.012 60)",
+          "oklch(0.51 0.012 60)",
+          "oklch(0.63 0.012 60)",
+          "oklch(0.75 0.012 60)",
+          "oklch(0.86 0.012 60)",
+          "oklch(0.95 0.012 60)"
+        ]
+      },
+      "night-primary-soft": {
+        "role": "primary",
+        "displayName": "Night School Soft",
+        "canonical": "color-mix(in oklch, var(--primary) 22%, var(--card))",
+        "approxForFallback": "oklch(0.29 0.05 35)",
+        "tonalRamp": [
+          "oklch(0.15 0.05 35)",
+          "oklch(0.27 0.05 35)",
+          "oklch(0.39 0.05 35)",
+          "oklch(0.51 0.05 35)",
+          "oklch(0.63 0.05 35)",
+          "oklch(0.75 0.05 35)",
+          "oklch(0.86 0.05 35)",
+          "oklch(0.95 0.05 35)"
+        ]
+      },
+      "night-primary-ink": {
+        "role": "primary",
+        "displayName": "Night School Ink",
+        "canonical": "color-mix(in oklch, var(--primary) 45%, oklch(0.95 0.01 75))",
+        "approxForFallback": "oklch(0.76 0.09 50)",
+        "tonalRamp": [
+          "oklch(0.15 0.09 45)",
+          "oklch(0.27 0.09 45)",
+          "oklch(0.39 0.09 45)",
+          "oklch(0.51 0.09 45)",
+          "oklch(0.63 0.09 45)",
+          "oklch(0.75 0.09 45)",
+          "oklch(0.86 0.09 45)",
+          "oklch(0.95 0.09 45)"
+        ]
+      },
+      "night-hairline": {
+        "role": "neutral",
+        "displayName": "Night Hairline",
+        "canonical": "oklch(1 0 0 / 9%)",
+        "approxForFallback": "rgba(255,255,255,0.09)",
+        "tonalRamp": [
+          "oklch(0.15 0 0)",
+          "oklch(0.27 0 0)",
+          "oklch(0.39 0 0)",
+          "oklch(0.51 0 0)",
+          "oklch(0.63 0 0)",
+          "oklch(0.75 0 0)",
+          "oklch(0.86 0 0)",
+          "oklch(0.95 0 0)"
+        ]
+      }
+    },
+    "darkModeOverrides": {
+      "selector": ".dark on <html>, set before paint from localStorage 'portal-theme' (light | dark | system)",
+      "map": {
+        "background": "night-paper",
+        "card": "night-card",
+        "popover": "night-card",
+        "foreground": "night-ink",
+        "muted-foreground": "night-ink-muted",
+        "primary-soft": "night-primary-soft",
+        "primary-ink": "night-primary-ink",
+        "border": "night-hairline",
+        "input": "oklch(1 0 0 / 14%)",
+        "secondary": "oklch(0.26 0.01 40)",
+        "muted": "oklch(0.25 0.01 40)",
+        "destructive": "oklch(0.7 0.17 25)",
+        "success": "oklch(0.75 0.13 155)",
+        "success-soft": "oklch(0.3 0.05 155)",
+        "warning": "oklch(0.8 0.13 80)",
+        "warning-soft": "oklch(0.32 0.05 80)",
+        "danger-soft": "oklch(0.3 0.06 25)"
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "School name on the desktop sign-in aside only."
+      },
+      "metric": {
+        "displayName": "Metric",
+        "purpose": "CGPA: 2.75rem on Academics, 2rem on Home."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Page titles; 1.5rem, 1.75rem from 640px."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Section headings; sheet titles at 700."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Base reading size on body; row titles at 600."
+      },
+      "body-sm": {
+        "displayName": "Body Small",
+        "purpose": "Meta lines, dates, row details, buttons."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Status pills, tab-bar labels, small notes."
+      },
+      "numeral": {
+        "displayName": "Numeral (.num)",
+        "purpose": "Every amount, GPA, unit count and reg number: Manrope, tabular-nums, -0.01em."
+      }
+    },
+    "shadows": [
+      {
+        "name": "soft",
+        "value": "0 1px 2px oklch(0.3 0.02 50 / 0.06), 0 4px 16px -6px oklch(0.3 0.02 50 / 0.12)",
+        "purpose": "Resting filled surfaces: primary buttons, payments statement, payment-status card, loader disc."
+      },
+      {
+        "name": "lift",
+        "value": "0 2px 4px oklch(0.3 0.02 50 / 0.06), 0 18px 40px -18px oklch(0.3 0.04 40 / 0.35)",
+        "purpose": "Held or floating objects: ID card, sign-in card, sheets, floating save bar."
+      },
+      {
+        "name": "focus-ring",
+        "value": "outline: 2px solid var(--ring); outline-offset: 2px",
+        "purpose": "Global :focus-visible."
+      },
+      {
+        "name": "chrome-blur",
+        "value": "backdrop-filter: blur(24px) over paper at 70-85% or card at 80-92%",
+        "purpose": "Sticky top bar and bottom tab bar only."
+      },
+      {
+        "name": "sheet-scrim",
+        "value": "background: oklch(0.2 0.02 40 / 0.45); backdrop-filter: blur(2px)",
+        "purpose": "Overlay behind sheets."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-out-expo",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Default curve: buttons (200ms), sheen, mesh, halo, auth entrance."
+      },
+      {
+        "name": "nav-pill-spring",
+        "value": "spring stiffness 420, damping 34 (shared layoutId)",
+        "purpose": "Active pill travels between nav items, desktop and tab bar."
+      },
+      {
+        "name": "id-card-press",
+        "value": "whileTap scale 0.985, rotateX 3, rotateY -2; spring 380/26; perspective 900",
+        "purpose": "ID card tilt on press."
+      },
+      {
+        "name": "id-sheen",
+        "value": "background-position sweep, 900ms ease-out-expo",
+        "purpose": "Light band across the ID card on hover, press and focus."
+      },
+      {
+        "name": "button-press",
+        "value": "scale 0.98 on :active, 200ms",
+        "purpose": "All buttons except menu triggers."
+      },
+      {
+        "name": "mesh-drift",
+        "value": "26s / 32s / 36s alternate, transform-only",
+        "purpose": "Sign-in background blobs."
+      },
+      {
+        "name": "brand-spin",
+        "value": "1.1s linear infinite (3s under reduced motion)",
+        "purpose": "Loader conic ring."
+      },
+      {
+        "name": "brand-breathe",
+        "value": "2.2s ease-out-expo infinite",
+        "purpose": "Loader halo."
+      },
+      {
+        "name": "auth-entrance",
+        "value": "opacity 0 to 1, y 14-18px to 0, 0.6-0.7s ease-out-expo",
+        "purpose": "Sign-in aside and card arrival."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "mesh and halo stop, ring slows to 3s, sheen transition removed",
+        "purpose": "prefers-reduced-motion: reduce."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "sm",
+        "value": "640px",
+        "purpose": "Gutters 24px, row padding 20px, sheet becomes a centred panel."
+      },
+      {
+        "name": "md",
+        "value": "768px",
+        "purpose": "Bottom tab bar gives way to top-bar pill nav; buttons 40px tall."
+      },
+      {
+        "name": "lg",
+        "value": "1024px",
+        "purpose": "Two-column Home and sign-in; statement rows stop bleeding."
+      },
+      {
+        "name": "container",
+        "value": "72rem",
+        "purpose": "Max content width."
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The one action a row or statement ends in: Pay, Download.",
+      "html": "<button class=\"ds-btn-primary\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x=\"3\" y=\"5\" width=\"18\" height=\"14\" rx=\"3\"/><path d=\"M3 10h18M7 15h.01M11 15h2\"/></svg>Pay ₦105,500 now</button>",
+      "css": ".ds-btn-primary{display:inline-flex;align-items:center;gap:6px;height:44px;padding:0 16px;border:1px solid transparent;border-radius:10.5px;background:var(--primary,#b42318);color:var(--primary-foreground,#fff);font:600 .875rem/1 'Source Sans 3',system-ui,sans-serif;box-shadow:0 1px 2px oklch(0.3 0.02 50/.06),0 4px 16px -6px oklch(0.3 0.02 50/.12);cursor:pointer;transition:background-color .2s cubic-bezier(.16,1,.3,1),transform .2s cubic-bezier(.16,1,.3,1)}.ds-btn-primary:hover{background:color-mix(in oklch,var(--primary,#b42318) 88%,black)}.ds-btn-primary:focus-visible{outline:none;border-color:color-mix(in oklch,var(--primary,#b42318) 70%,transparent);box-shadow:0 0 0 2px color-mix(in oklch,var(--primary,#b42318) 30%,transparent)}.ds-btn-primary:active{transform:scale(.98)}"
+    },
+    {
+      "name": "Outline Button",
+      "kind": "button",
+      "refersTo": "button-outline",
+      "description": "Secondary action beside a primary: All fees, See results, Try again.",
+      "html": "<button class=\"ds-btn-outline\">All fees</button>",
+      "css": ".ds-btn-outline{display:inline-flex;align-items:center;height:44px;padding:0 16px;border:1px solid oklch(0.9 0.008 70);border-radius:10.5px;background:oklch(1 0.002 75);color:oklch(0.22 0.012 40);font:600 .875rem/1 'Source Sans 3',system-ui,sans-serif;cursor:pointer;transition:background-color .2s cubic-bezier(.16,1,.3,1),transform .2s cubic-bezier(.16,1,.3,1)}.ds-btn-outline:hover{background:color-mix(in srgb,var(--primary,#b42318) 2%,#f0ece6)}.ds-btn-outline:focus-visible{outline:2px solid color-mix(in oklch,var(--primary,#b42318) 70%,transparent);outline-offset:2px}.ds-btn-outline:active{transform:scale(.98)}"
+    },
+    {
+      "name": "Text Field",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Sign-in and profile fields.",
+      "html": "<input class=\"ds-input\" placeholder=\"Reg number or email\" />",
+      "css": ".ds-input{height:44px;width:280px;padding:4px 12px;border:1px solid oklch(0.88 0.01 70);border-radius:10.5px;background:oklch(1 0.002 75);color:oklch(0.22 0.012 40);font:400 .9375rem/1.4 'Source Sans 3',system-ui,sans-serif;outline:none;caret-color:var(--primary,#b42318);transition:border-color .15s,box-shadow .15s}.ds-input::placeholder{color:oklch(0.47 0.014 45)}.ds-input:focus-visible{border-color:color-mix(in oklch,var(--primary,#b42318) 70%,transparent);box-shadow:0 0 0 3px color-mix(in oklch,var(--primary,#b42318) 35%,transparent)}"
+    },
+    {
+      "name": "Status Pill",
+      "kind": "chip",
+      "refersTo": "status-pill-warning",
+      "description": "Fee state: icon plus word, never colour alone.",
+      "html": "<span class=\"ds-pill ds-pill--paid\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"currentColor\"><path d=\"M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm4.7 7.7-5.5 5.5a1 1 0 0 1-1.4 0l-2.5-2.5 1.4-1.4 1.8 1.8 4.8-4.8 1.4 1.4Z\"/></svg>Paid</span> <span class=\"ds-pill ds-pill--due\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M12 7v5l3 2\"/></svg>Due</span> <span class=\"ds-pill ds-pill--overdue\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M12 4 2.5 20h19L12 4Z\"/><path d=\"M12 10v4M12 17h.01\"/></svg>Overdue</span>",
+      "css": ".ds-pill{display:inline-flex;align-items:center;gap:4px;height:24px;padding:0 10px 0 6px;border-radius:9999px;font:600 .75rem/1 'Source Sans 3',system-ui,sans-serif}.ds-pill--paid{background:oklch(0.95 0.04 155);color:oklch(0.52 0.12 155)}.ds-pill--due{background:oklch(0.96 0.05 85);color:color-mix(in oklch,oklch(0.6 0.13 70) 75%,black)}.ds-pill--overdue{background:oklch(0.95 0.035 25);color:oklch(0.55 0.2 27)}"
+    },
+    {
+      "name": "Statement Row",
+      "kind": "custom",
+      "refersTo": "statement-row",
+      "description": "Default list item: hairline-ruled, full-bleed, figure and pill on the right, chevron when it opens a sheet.",
+      "html": "<ul class=\"ds-rows\"><li><button class=\"ds-row\"><span class=\"ds-row__main\"><span class=\"ds-row__title\">Second Semester 200L Registration</span><span class=\"ds-row__meta\">Tuition · Second Semester</span><span class=\"ds-row__meta\">Due 31 Dec 2028</span></span><span class=\"ds-row__end\"><span class=\"ds-row__amt\">₦105,500</span><span class=\"ds-row__pill\">Due</span></span><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" class=\"ds-row__chev\"><path d=\"m9 6 6 6-6 6\"/></svg></button></li></ul>",
+      "css": ".ds-rows{list-style:none;margin:0;padding:0;width:380px;border-top:1px solid oklch(0.9 0.008 70);border-bottom:1px solid oklch(0.9 0.008 70)}.ds-row{display:flex;align-items:center;gap:12px;width:100%;padding:14px 16px;border:0;background:transparent;text-align:left;color:oklch(0.22 0.012 40);cursor:pointer;transition:background-color .15s}.ds-row:hover,.ds-row:focus-visible{background:color-mix(in srgb,color-mix(in srgb,var(--primary,#b42318) 2%,#f0ece6) 60%,transparent);outline:none}.ds-row__main{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}.ds-row__title{font:600 .9375rem/1.35 'Source Sans 3',system-ui,sans-serif}.ds-row__meta{font:400 .875rem/1.4 'Source Sans 3',system-ui,sans-serif;color:oklch(0.47 0.014 45)}.ds-row__end{display:flex;flex-direction:column;align-items:flex-end;gap:4px}.ds-row__amt{font:700 .9375rem/1 Manrope,system-ui,sans-serif;font-variant-numeric:tabular-nums;letter-spacing:-.01em}.ds-row__pill{display:inline-flex;align-items:center;height:24px;padding:0 10px;border-radius:9999px;background:oklch(0.96 0.05 85);color:color-mix(in oklch,oklch(0.6 0.13 70) 75%,black);font:600 .75rem/1 'Source Sans 3',system-ui,sans-serif}.ds-row__chev{flex-shrink:0;color:oklch(0.47 0.014 45 / .6)}"
+    },
+    {
+      "name": "Navigation Pill Bar",
+      "kind": "nav",
+      "refersTo": "nav-pill-active",
+      "description": "Desktop top-bar nav; the active item sits on a springing school-soft pill; unpaid count badge on Payments.",
+      "html": "<nav class=\"ds-nav\"><a class=\"ds-nav__item is-active\" href=\"#\">Home</a><a class=\"ds-nav__item\" href=\"#\">Payments <span class=\"ds-badge\">4</span></a><a class=\"ds-nav__item\" href=\"#\">Academics</a><a class=\"ds-nav__item\" href=\"#\">Updates</a></nav>",
+      "css": ".ds-nav{display:flex;gap:4px}.ds-nav__item{display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 14px;border-radius:9999px;color:oklch(0.47 0.014 45);font:600 .875rem/1 'Source Sans 3',system-ui,sans-serif;text-decoration:none;transition:color .15s,background-color .2s cubic-bezier(.16,1,.3,1)}.ds-nav__item:hover{color:oklch(0.22 0.012 40)}.ds-nav__item.is-active{background:color-mix(in oklch,var(--primary,#b42318) 10%,oklch(1 0.002 75));color:color-mix(in oklch,var(--primary,#b42318) 78%,oklch(0.2 0.02 40))}.ds-nav__item:focus-visible{outline:2px solid color-mix(in oklch,var(--primary,#b42318) 70%,transparent);outline-offset:2px}.ds-badge{display:grid;place-items:center;min-width:18px;height:18px;padding:0 4px;border-radius:9999px;background:var(--primary,#b42318);color:var(--primary-foreground,#fff);font:700 .6875rem/1 Manrope,system-ui,sans-serif;font-variant-numeric:tabular-nums}"
+    },
+    {
+      "name": "ID Card",
+      "kind": "card",
+      "refersTo": "id-card",
+      "description": "Signature identity surface: school-colour field, guilloche, photo, name, copyable reg number, programme pills; tilts and sweeps light on press.",
+      "html": "<section class=\"ds-id\"><svg class=\"ds-id__g\" viewBox=\"0 0 400 240\" preserveAspectRatio=\"xMidYMid slice\" fill=\"none\" stroke=\"currentColor\" stroke-width=\".75\"><path d=\"M-20 60 C60 20 120 100 200 60 S340 20 420 60\"/><path d=\"M-20 90 C60 50 120 130 200 90 S340 50 420 90\"/><path d=\"M-20 120 C60 80 120 160 200 120 S340 80 420 120\"/><path d=\"M-20 150 C60 110 120 190 200 150 S340 110 420 150\"/></svg><span class=\"ds-id__sheen\"></span><p class=\"ds-id__school\">Student Portal</p><div class=\"ds-id__row\"><span class=\"ds-id__photo\">RA</span><div><h2 class=\"ds-id__name\">Rumasau Aliyu</h2><span class=\"ds-id__reg\">BM/01/037</span></div></div><div class=\"ds-id__tags\"><span>Basic Midwifery</span><span>200 level</span><span>Set 1</span></div></section>",
+      "css": ".ds-id{position:relative;isolation:isolate;overflow:hidden;width:340px;padding:16px;border-radius:24px;background:radial-gradient(120% 90% at 100% 0%,oklch(1 0 0/.18),transparent 55%),linear-gradient(to top,oklch(0 0 0/.18),transparent 60%),color-mix(in oklch,var(--primary,#b42318) 86%,black);color:var(--primary-foreground,#fff);box-shadow:0 2px 4px oklch(0.3 0.02 50/.06),0 18px 40px -18px oklch(0.3 0.04 40/.35);font-family:'Source Sans 3',system-ui,sans-serif;transition:transform .3s cubic-bezier(.16,1,.3,1)}.ds-id:active{transform:perspective(900px) scale(.985) rotateX(3deg) rotateY(-2deg)}.ds-id__g{position:absolute;inset:0;width:100%;height:100%;opacity:.14;z-index:-1}.ds-id__sheen{position:absolute;inset:0;pointer-events:none;background:linear-gradient(115deg,transparent 30%,oklch(1 0 0/.22) 48%,transparent 62%);background-size:250% 100%;background-position:120% 0;transition:background-position .9s cubic-bezier(.16,1,.3,1)}.ds-id:hover .ds-id__sheen{background-position:-40% 0}.ds-id__school{margin:0;font-size:.8125rem;font-weight:600;opacity:.9}.ds-id__row{display:flex;align-items:center;gap:16px;margin-top:16px}.ds-id__photo{display:grid;place-items:center;width:72px;height:72px;border-radius:17.6px;box-shadow:0 0 0 3px oklch(1 0 0/.7);background:color-mix(in oklch,var(--primary,#b42318) 22%,oklch(0.215 0.009 40));font:700 1.25rem Manrope,system-ui,sans-serif}.ds-id__name{margin:0;font:800 1.25rem/1.25 Manrope,system-ui,sans-serif;letter-spacing:-.02em}.ds-id__reg{display:inline-block;margin-top:4px;font:700 1.125rem/1 Manrope,system-ui,sans-serif;font-variant-numeric:tabular-nums;letter-spacing:.025em}.ds-id__tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:16px;font-size:.8125rem;font-weight:600}.ds-id__tags span{padding:4px 10px;border-radius:9999px;background:oklch(1 0 0/.18)}"
+    },
+    {
+      "name": "Payments Statement",
+      "kind": "card",
+      "refersTo": "statement-card",
+      "description": "Filled statement surface: one sentence of what is owed and one primary action.",
+      "html": "<section class=\"ds-stmt\"><p class=\"ds-stmt__line\">You owe <span class=\"ds-stmt__amt\">₦357,350</span><span class=\"ds-stmt__rest\"> across 4 fees.</span></p><p class=\"ds-stmt__meta\">Next due: Second Semester 200L Registration · 31 Dec 2028</p><button class=\"ds-stmt__btn\">Pay ₦105,500 now</button><p class=\"ds-stmt__foot\">Paid so far: <b>₦179,950</b> · 2 receipts</p></section>",
+      "css": ".ds-stmt{width:340px;padding:20px;border:1px solid oklch(0.9 0.008 70);border-radius:20px;background:oklch(1 0.002 75);color:oklch(0.22 0.012 40);box-shadow:0 1px 2px oklch(0.3 0.02 50/.06),0 4px 16px -6px oklch(0.3 0.02 50/.12);font-family:'Source Sans 3',system-ui,sans-serif}.ds-stmt__line{margin:0;font:700 1.25rem/1.375 Manrope,system-ui,sans-serif;letter-spacing:-.02em}.ds-stmt__amt{color:color-mix(in oklch,var(--primary,#b42318) 78%,oklch(0.2 0.02 40));font-variant-numeric:tabular-nums}.ds-stmt__rest{color:oklch(0.47 0.014 45);font-weight:600}.ds-stmt__meta{margin:4px 0 0;font-size:.875rem;color:oklch(0.47 0.014 45)}.ds-stmt__btn{margin-top:16px;width:100%;height:44px;border:0;border-radius:10.5px;background:var(--primary,#b42318);color:var(--primary-foreground,#fff);font:600 .9375rem/1 'Source Sans 3',system-ui,sans-serif;cursor:pointer;transition:background-color .2s cubic-bezier(.16,1,.3,1),transform .2s cubic-bezier(.16,1,.3,1)}.ds-stmt__btn:hover{background:color-mix(in oklch,var(--primary,#b42318) 88%,black)}.ds-stmt__btn:active{transform:scale(.98)}.ds-stmt__btn:focus-visible{outline:2px solid color-mix(in oklch,var(--primary,#b42318) 70%,transparent);outline-offset:2px}.ds-stmt__foot{margin:16px 0 0;padding-top:12px;border-top:1px solid oklch(0.9 0.008 70);font-size:.875rem;color:oklch(0.47 0.014 45)}.ds-stmt__foot b{color:oklch(0.22 0.012 40);font-family:Manrope,system-ui,sans-serif;font-variant-numeric:tabular-nums}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The ID Card and the Statement",
+    "overview": "The portal is a student's identity document and their account statement, issued by their own school. One object carries identity: the ID card, a filled field of the school's colour with a faint guilloche like security print, the passport photo framed in white, the reg number set in tabular numerals. Everything else is a statement: warm paper, a tinted near-black ink, hairline-ruled rows that run to the screen edge, each row ending in an action (pay, download, read). The system is calm and premium rather than busy; it refuses the admin dashboard of sidebars, stat-tile grids and equal cards.\n\nBecause one codebase ships to many schools, the colour system is relational, not fixed. Each school's `NEXT_PUBLIC_PRIMARY_COLOR` is written onto `<html>` as `--primary`, with `--primary-foreground` picked for contrast (white, or near-black `#1f1a17` for light school colours). Every brand tint, the soft fill, the readable ink, the ID card field, the focus ring, the paper itself, is derived from that one variable. The hex values in this file are the fallback school (`#b42318`); the relationships are the design.\n\nDensity is phone-first: 44px touch targets, a sticky top bar and a bottom tab bar below 768px, a single column that becomes a two-column ledger at 1024px. Light, dark and match-device themes are first-class, chosen from the profile menu. Motion is sparing and physical: a spring on the active nav pill, a tilt and light sweep on the ID card, a slowly drifting mesh behind sign-in, the school logo in a rotating conic ring while loading. All of it stops or slows under reduced motion.",
+    "keyCharacteristics": [
+      "One school colour, used as a committed field (ID card, primary actions, count badge) and as soft/ink tints (active nav, date tiles, links).",
+      "Warm paper ground and one tinted ink family; neutrals lean a breath toward the school colour.",
+      "Statement rows on hairlines, not boxed cards; filled surfaces are few and purposeful.",
+      "Manrope for headings and every figure (tabular); Source Sans 3 for reading.",
+      "Status always shown as icon plus word, never colour alone.",
+      "Corners tight inside, soft outside."
+    ],
+    "rules": [
+      {
+        "name": "The One Variable Rule",
+        "body": "Every brand colour is a `color-mix()` of `var(--primary)`. A new surface that needs the school's colour derives it from `--primary`, `--primary-soft`, `--primary-ink` or `--ring`; it never names a hue.",
+        "section": "colors"
+      },
+      {
+        "name": "The sRGB Neutrals Rule",
+        "body": "Neutrals tinted toward the school mix in sRGB at 3% or less; brand tints (soft, ink, ring, ID field) mix in oklch. An oklch mix drags a near-grey's hue all the way to the primary (a red school's paper went rose).",
+        "section": "colors"
+      },
+      {
+        "name": "The Contrast-Picked Ink Rule",
+        "body": "Text on the school colour is always `--primary-foreground`, chosen by `foregroundOn()`. Never assume white on primary.",
+        "section": "colors"
+      },
+      {
+        "name": "The Words-With-Colour Rule",
+        "body": "Paid, due, overdue and fail always appear with an icon and a word. Colour confirms; it never carries the meaning alone.",
+        "section": "colors"
+      },
+      {
+        "name": "The Tabular Money Rule",
+        "body": "Any figure a student compares or copies (amounts, GPA, CGPA, units, reg numbers, references) is set in `.num`: Manrope with `tnum`. Prose numerals stay in the body face.",
+        "section": "typography"
+      },
+      {
+        "name": "The Heavy Heading Rule",
+        "body": "h1 to h3 are Manrope at 800 with -0.02em tracking and balanced wrapping. Body copy is never set in Manrope, and headings are never set in Source Sans 3.",
+        "section": "typography"
+      },
+      {
+        "name": "The Bleed Rule",
+        "body": "Statement lists bleed to the screen edge below 1024px (negative margins equal to the gutter) so rows read like a native list and their content aligns with section headings; from 1024px the rules stay inside the grid column.",
+        "section": "layout"
+      },
+      {
+        "name": "The Two Shadows Rule",
+        "body": "Only Soft and Lift exist. Lift is for objects that are held or that float over content; Soft is for filled surfaces resting on the page. Rows and lists cast nothing.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Chrome-Only Blur Rule",
+        "body": "Backdrop blur belongs to fixed chrome: the sticky top bar (paper at 70 to 85%), the bottom tab bar (card at 80 to 92%), and the sheet scrim (warm ink at 45%, 2px blur). Content cards are solid `card`; the sign-in card was moved off glass for this reason.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Soft-Outside Rule",
+        "body": "A container's radius is never smaller than the radius of what it holds; the larger and more \"held\" the object, the softer its corner.",
+        "section": "shapes"
+      }
+    ],
+    "dos": [
+      "Do derive every brand colour from `var(--primary)` and put text on it in `--primary-foreground`.",
+      "Do mix tinted neutrals in sRGB (3% or less) and brand tints in oklch.",
+      "Do list fees, memos, events, results and documents as full-bleed statement rows on hairlines, each ending in an action.",
+      "Do set every amount, GPA, unit count and reg number in `.num` (Manrope, tabular).",
+      "Do pair every state colour with an icon and a word.",
+      "Do keep touch targets at 44px minimum on phones.",
+      "Do use Lift only for held or floating objects (ID card, sign-in card, sheets, floating bars) and Soft for resting filled surfaces.",
+      "Do stop the mesh and halo, slow the loader ring, and drop the sheen under `prefers-reduced-motion`."
+    ],
+    "donts": [
+      "Don't hard-code a school's hue or tune a component to the fallback red; it must hold for any school colour, light or dark.",
+      "Don't build the admin-dashboard pattern: no sidebar, no stat-tile grid, no rows of equal boxed cards.",
+      "Don't wrap lists in bordered cards; the filled surfaces are the ID card, the statement, sheets, the sign-in card and empty states.",
+      "Don't put backdrop blur or translucency on content cards; blur is for fixed chrome and the sheet scrim.",
+      "Don't add shadows beyond Soft and Lift.",
+      "Don't show paid, due or overdue by colour alone.",
+      "Don't set body copy in Manrope or headings in Source Sans 3."
+    ]
+  }
+}

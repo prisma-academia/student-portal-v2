@@ -9,15 +9,28 @@ export type ContactInfo = {
   phone?: string;
   email?: string;
   address?: string;
+  state?: string;
+  lga?: string;
+};
+
+export type GuardianInfo = {
+  guardianName?: string;
+  guardianPhone?: string;
+  relationship?: string;
 };
 
 export type Program = {
+  _id?: string;
   name?: string;
   durationInYears?: number;
 };
 
 export type ClassLevel = {
+  _id?: string;
+  name?: string;
+  /** Stored as 100/200/... on some tenants and 1/2/... on others. */
   level?: number;
+  set?: number;
 };
 
 export type Student = {
@@ -27,9 +40,11 @@ export type Student = {
   picture?: string;
   personalInfo?: PersonalInfo;
   contactInfo?: ContactInfo;
+  guardianInfo?: GuardianInfo;
   program?: Program;
   classLevel?: ClassLevel;
   enrollmentDate?: string;
+  status?: string;
 };
 
 export type Memo = {
@@ -38,7 +53,7 @@ export type Memo = {
   createdAt?: string;
   isPublic?: boolean;
   content?: string;
-  createdBy?: { name?: string };
+  createdBy?: { firstName?: string; lastName?: string; name?: string } | string;
   programs?: { name?: string }[];
   classLevels?: { name?: string }[];
 };
@@ -54,14 +69,49 @@ export type StudentDocument = {
 
 export type FeeItem = { name?: string; quantity?: number; price?: number };
 
+export type FeePayment = {
+  _id?: string;
+  amount?: number;
+  status?: string;
+  reference?: string;
+  gateway?: string;
+  createdAt?: string;
+};
+
 export type Fee = {
   _id: string;
   name?: string;
+  description?: string;
   amount?: number;
   dueDate?: string;
+  feeType?: string;
+  semester?: string | null;
+  /** Active | Overdue | ... */
+  status?: string;
+  session?: { _id?: string; name?: string; code?: string } | null;
   items?: FeeItem[];
   isPaid?: boolean;
-  userPayment?: { _id?: string };
+  userPayment?: FeePayment | null;
+};
+
+/** GET /student/me/events (raw calendar event). */
+export type SchoolEvent = {
+  _id: string;
+  title?: string;
+  description?: string;
+  start?: string;
+  end?: string;
+  allDay?: boolean;
+  category?: string;
+  url?: string;
+};
+
+/** GET /student/me/course-form-summary */
+export type CourseFormAvailability = {
+  yearId: string;
+  semester: string;
+  available: boolean;
+  courseCount: number;
 };
 
 export type CalendarEventInput = {

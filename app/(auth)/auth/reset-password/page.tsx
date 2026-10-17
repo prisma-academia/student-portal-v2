@@ -81,7 +81,7 @@ function ResetPasswordForm() {
       </Button>
       <Link
         href="/auth/sign-in"
-        className="text-primary text-center text-xs font-medium"
+        className="text-primary-ink inline-flex min-h-10 items-center justify-center text-center text-sm font-semibold hover:underline"
       >
         Back to sign in
       </Link>
@@ -93,8 +93,8 @@ export default function ResetPasswordPage() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="text-lg font-semibold">Reset password</h1>
-        <p className="text-muted-foreground mt-1 text-xs">
+        <h1 className="text-2xl font-extrabold">Reset password</h1>
+        <p className="text-muted-foreground mt-1 text-sm">
           Choose a new password for your account.
         </p>
       </div>

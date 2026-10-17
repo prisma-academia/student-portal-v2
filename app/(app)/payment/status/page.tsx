@@ -1,166 +1,169 @@
 "use client";
 
 import {
-  IconAlertCircle,
+  IconAlertTriangle,
   IconCircleCheck,
+  IconClockHour4,
   IconHelpCircle,
   IconLoader2,
 } from "@tabler/icons-react";
 import { useQueryClient } from "@tanstack/react-query";
+import { motion } from "motion/react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Suspense, useEffect, useState, type ReactNode } from "react";
+import { BrandLoader } from "@/components/system/brand-loader";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { verifyPayment } from "@/lib/api/student";
+import { qk } from "@/lib/queries";
+import { cn } from "@/lib/utils";
 
-export default function PaymentStatusPage() {
-  const searchParams = useSearchParams();
+type Outcome = "checking" | "success" | "failed" | "pending" | "invalid";
+
+/** Paystack can take a moment to settle: re-verify a few times before giving up. */
+const RETRY_DELAYS = [0, 3000, 6000, 10000];
+
+function readStatus(data: unknown): string | undefined {
+  const d = data as { data?: { status?: string }; status?: string } | null;
+  return (d?.data?.status ?? d?.status)?.toString().toLowerCase();
+}
+
+function StatusView() {
+  const params = useSearchParams();
   const queryClient = useQueryClient();
-  const status = searchParams.get("status");
-  const reference = searchParams.get("reference");
-
-  const [verifying, setVerifying] = useState(false);
-  const [verifyError, setVerifyError] = useState("");
-  const [verified, setVerified] = useState(false);
-
-  const isSuccess = status === "success";
-  const isFailed = status === "failed";
-  const hasParams = Boolean(status && reference);
+  const gatewayStatus = params.get("status");
+  const reference = params.get("reference");
+  const [outcome, setOutcome] = useState<Outcome>(reference ? "checking" : "invalid");
+  const [note, setNote] = useState("");
 
   useEffect(() => {
     if (!reference) return;
-
     let cancelled = false;
-    setVerifying(true);
-    setVerifyError("");
 
-    verifyPayment(reference)
-      .then((res) => {
+    (async () => {
+      for (const delay of RETRY_DELAYS) {
+        if (delay) await new Promise((r) => setTimeout(r, delay));
         if (cancelled) return;
-        if (!res.ok) {
-          const body = res.data as { message?: string } | null;
-          throw new Error(body?.message || res.message);
+        const res = await verifyPayment(reference);
+        if (cancelled) return;
+        // The API answers 200 only when Completed; pending/failed come back as
+        // 400 with a message ("Payment is still pending…" / "…failed…").
+        const status = res.ok ? readStatus(res.data) : undefined;
+        if (res.ok && (status === undefined || status === "completed" || status === "success")) {
+          setOutcome("success");
+          queryClient.invalidateQueries({ queryKey: qk.fees });
+          return;
         }
-        setVerified(true);
-        queryClient.invalidateQueries({ queryKey: ["student", "fees"] });
-      })
-      .catch((err: Error) => {
-        if (cancelled) return;
-        setVerifyError(err.message || "Could not verify payment");
-      })
-      .finally(() => {
-        if (!cancelled) setVerifying(false);
-      });
+        if (status === "failed" || status === "abandoned" || /fail/i.test(res.message)) {
+          setOutcome("failed");
+          queryClient.invalidateQueries({ queryKey: qk.fees });
+          return;
+        }
+        if (!/pending/i.test(res.message)) setNote(res.message);
+      }
+      // Verification never settled: fall back to what the gateway told us.
+      setOutcome(gatewayStatus === "success" ? "success" : gatewayStatus === "failed" ? "failed" : "pending");
+      queryClient.invalidateQueries({ queryKey: qk.fees });
+    })();
 
     return () => {
       cancelled = true;
     };
-  }, [reference, queryClient]);
+  }, [reference, gatewayStatus, queryClient]);
+
+  const views: Record<Outcome, { icon: ReactNode; tone: string; title: string; body: string; actions: ReactNode }> = {
+    checking: {
+      icon: <IconLoader2 className="size-9 animate-spin" />,
+      tone: "bg-muted text-foreground/70",
+      title: "Confirming your payment",
+      body: "Checking with Paystack. This usually takes a few seconds. Please don't close this page.",
+      actions: null,
+    },
+    success: {
+      icon: <IconCircleCheck className="size-9" />,
+      tone: "bg-success-soft text-success",
+      title: "Payment received",
+      body: "Your payment has been recorded. Your receipt is ready on the Payments page.",
+      actions: (
+        <Button asChild size="lg" className="w-full sm:w-auto">
+          <Link href="/payments">See receipt</Link>
+        </Button>
+      ),
+    },
+    failed: {
+      icon: <IconAlertTriangle className="size-9" />,
+      tone: "bg-danger-soft text-danger",
+      title: "Payment didn't go through",
+      body: "No money was taken for this attempt. You can try again from Payments.",
+      actions: (
+        <Button asChild size="lg" className="w-full sm:w-auto">
+          <Link href="/payments">Try again</Link>
+        </Button>
+      ),
+    },
+    pending: {
+      icon: <IconClockHour4 className="size-9" />,
+      tone: "bg-warning-soft text-[color-mix(in_oklch,var(--warning)_75%,black)] dark:text-warning",
+      title: "Payment is still processing",
+      body: "Paystack hasn't confirmed it yet. Check Payments in a few minutes. Don't pay again until it shows as paid or failed.",
+      actions: (
+        <Button asChild size="lg" variant="outline" className="w-full sm:w-auto">
+          <Link href="/payments">Go to Payments</Link>
+        </Button>
+      ),
+    },
+    invalid: {
+      icon: <IconHelpCircle className="size-9" />,
+      tone: "bg-muted text-foreground/70",
+      title: "No payment to show",
+      body: "This page opens after you pay on Paystack. To pay a fee, start from Payments.",
+      actions: (
+        <Button asChild size="lg" className="w-full sm:w-auto">
+          <Link href="/payments">Go to Payments</Link>
+        </Button>
+      ),
+    },
+  };
+
+  const v = views[outcome];
 
   return (
-    <div className="mx-auto flex max-w-lg flex-col gap-6 py-4">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Payment status</h1>
-        <p className="text-muted-foreground text-sm">
-          Result of your recent payment attempt.
-        </p>
-      </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Transaction result</CardTitle>
-          <CardDescription>
-            {hasParams && reference ? `Reference: ${reference}` : "No reference provided"}
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="flex flex-col items-center gap-4 py-6 text-center">
-          {!hasParams && (
-            <>
-              <IconHelpCircle className="text-muted-foreground size-12" stroke={1.25} />
-              <Alert>
-                <AlertTitle>Invalid return link</AlertTitle>
-                <AlertDescription>
-                  This page expects payment status details from the gateway. Return to
-                  fees and try again if you were paying a fee.
-                </AlertDescription>
-              </Alert>
-              <Button asChild>
-                <Link href="/school">Back to fees</Link>
-              </Button>
-            </>
-          )}
-
-          {hasParams && verifying && (
-            <>
-              <IconLoader2 className="text-muted-foreground size-10 animate-spin" />
-              <p className="text-muted-foreground text-sm">Confirming your payment…</p>
-            </>
-          )}
-
-          {hasParams && !verifying && isSuccess && (
-            <>
-              <IconCircleCheck className="size-12 text-green-600" stroke={1.25} />
-              <div className="space-y-1">
-                <p className="font-medium text-green-700 dark:text-green-400">
-                  Payment successful
-                </p>
-                <p className="text-muted-foreground text-sm">
-                  {verified
-                    ? "Your payment has been recorded."
-                    : "Payment was accepted by the gateway."}
-                </p>
-              </div>
-              {verifyError && (
-                <Alert variant="destructive">
-                  <AlertDescription>{verifyError}</AlertDescription>
-                </Alert>
-              )}
-              <Button asChild>
-                <Link href="/school">Back to fees</Link>
-              </Button>
-            </>
-          )}
-
-          {hasParams && !verifying && isFailed && (
-            <>
-              <IconAlertCircle className="size-12 text-destructive" stroke={1.25} />
-              <div className="space-y-1">
-                <p className="text-destructive font-medium">Payment failed</p>
-                <p className="text-muted-foreground text-sm">
-                  The payment was not completed. You can try again from the fees page.
-                </p>
-              </div>
-              {verifyError && (
-                <Alert variant="destructive">
-                  <AlertDescription>{verifyError}</AlertDescription>
-                </Alert>
-              )}
-              <Button asChild variant="outline">
-                <Link href="/school">Back to fees</Link>
-              </Button>
-            </>
-          )}
-
-          {hasParams && !verifying && !isSuccess && !isFailed && (
-            <>
-              <IconHelpCircle className="text-muted-foreground size-12" stroke={1.25} />
-              <p className="font-medium">Unknown status</p>
-              <p className="text-muted-foreground text-sm">Status: {status}</p>
-              <Button asChild>
-                <Link href="/school">Back to fees</Link>
-              </Button>
-            </>
-          )}
-        </CardContent>
-      </Card>
+    <div className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center py-6">
+      <motion.section
+        key={outcome}
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+        className="bg-card flex flex-col items-center rounded-[1.5rem] border px-6 py-8 text-center shadow-[var(--shadow-soft)]"
+        aria-live="polite"
+      >
+        <motion.span
+          initial={{ scale: 0.6 }}
+          animate={{ scale: 1 }}
+          transition={{ type: "spring", stiffness: 300, damping: 18 }}
+          className={cn("grid size-[4.5rem] place-items-center rounded-full", v.tone)}
+          aria-hidden
+        >
+          {v.icon}
+        </motion.span>
+        <h1 className="mt-5 text-2xl font-extrabold">{v.title}</h1>
+        <p className="text-muted-foreground mt-2 text-[0.9375rem]">{v.body}</p>
+        {reference ? (
+          <p className="text-muted-foreground mt-4 text-sm">
+            Reference <span className="num text-foreground font-semibold break-all">{reference}</span>
+          </p>
+        ) : null}
+        {note && outcome !== "success" ? <p className="text-muted-foreground mt-2 text-xs">{note}</p> : null}
+        {v.actions ? <div className="mt-6 w-full sm:w-auto">{v.actions}</div> : null}
+      </motion.section>
     </div>
+  );
+}
+
+export default function PaymentStatusPage() {
+  return (
+    <Suspense fallback={<BrandLoader label="Confirming your payment" />}>
+      <StatusView />
+    </Suspense>
   );
 }

@@ -9,8 +9,16 @@ export type AuthState = {
   _hasHydrated: boolean;
   setHasHydrated: (v: boolean) => void;
   logIn: (p: { user: Student; token: string; refreshToken: string }) => void;
+  setUser: (user: Student) => void;
   logOut: () => void;
 };
+
+/** Drop fields that must never sit in localStorage (older APIs sent the hash). */
+export function sanitizeStudent(user: Student): Student {
+  const rest = { ...user } as Student & { password?: unknown };
+  delete rest.password;
+  return rest;
+}
 
 export const useAuthStore = create<AuthState>()(
   persist(
@@ -21,14 +29,15 @@ export const useAuthStore = create<AuthState>()(
       _hasHydrated: false,
       setHasHydrated: (v) => set({ _hasHydrated: v }),
       logIn: ({ user, token, refreshToken }) =>
-        set({ user, token, refreshToken }),
+        set({ user: sanitizeStudent(user), token, refreshToken }),
+      setUser: (user) => set({ user: sanitizeStudent(user) }),
       logOut: () => set({ user: null, token: null, refreshToken: null }),
     }),
     {
       name: "abcn_student_portal",
       storage: createJSONStorage(() => localStorage),
       partialize: (s) => ({
-        user: s.user,
+        user: s.user ? sanitizeStudent(s.user) : null,
         token: s.token,
         refreshToken: s.refreshToken,
       }),

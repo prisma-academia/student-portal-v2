@@ -1,5 +1,6 @@
 "use client";
 
+import { IconEye, IconEyeOff, IconLoader2 } from "@tabler/icons-react";
 import { useMutation } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -104,64 +105,70 @@ export default function SignInPage() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="text-lg font-semibold">Sign in</h1>
-        <p className="text-muted-foreground mt-1 text-xs">
-          Use your school email or registration number.
+        <h1 className="text-2xl font-extrabold">Welcome back</h1>
+        <p className="text-muted-foreground mt-1 text-sm">
+          Sign in with your registration number or school email.
         </p>
       </div>
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <div className="flex flex-col gap-2">
-          <Label htmlFor="loginId">Email or registration number</Label>
+          <Label htmlFor="loginId">Reg number or email</Label>
           <Input
             id="loginId"
             name="loginId"
             autoComplete="username"
+            autoCapitalize="characters"
+            spellCheck={false}
+            placeholder="e.g. BM/01/037"
             required
-            className="min-h-11"
           />
         </div>
         <div className="flex flex-col gap-2">
-          <Label htmlFor="password">Password</Label>
-          <Input
-            id="password"
-            name="password"
-            type={showPassword ? "text" : "password"}
-            autoComplete="current-password"
-            required
-            className="min-h-11"
-          />
-          <button
-            type="button"
-            className="text-primary text-xs font-medium self-start"
-            onClick={() => setShowPassword((v) => !v)}
-          >
-            {showPassword ? "Hide" : "Show"} password
-          </button>
-        </div>
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <label className="flex cursor-pointer items-center gap-2 text-xs">
-            <Checkbox
-              id="persistent"
-              checked={remember}
-              onCheckedChange={(v) => setRemember(v === true)}
+          <div className="flex items-center justify-between">
+            <Label htmlFor="password">Password</Label>
+            <Link
+              href="/auth/forgot-password"
+              className="text-primary-ink inline-flex min-h-8 items-center text-sm font-semibold hover:underline"
+            >
+              Forgot password?
+            </Link>
+          </div>
+          <div className="relative">
+            <Input
+              id="password"
+              name="password"
+              type={showPassword ? "text" : "password"}
+              autoComplete="current-password"
+              required
+              className="pr-12"
             />
-            Remember me
-          </label>
-          <Link
-            href="/auth/forgot-password"
-            className="text-primary text-xs font-medium"
-          >
-            Forgot password?
-          </Link>
+            <button
+              type="button"
+              aria-label={showPassword ? "Hide password" : "Show password"}
+              aria-pressed={showPassword}
+              className="text-muted-foreground hover:text-foreground absolute inset-y-0 right-0 grid w-12 place-items-center rounded-r-[var(--radius-md)]"
+              onClick={() => setShowPassword((v) => !v)}
+            >
+              {showPassword ? <IconEyeOff className="size-5" /> : <IconEye className="size-5" />}
+            </button>
+          </div>
         </div>
-        <Button
-          type="submit"
-          className="min-h-11 w-full sm:w-auto"
-          disabled={mutation.isPending}
-        >
+        <label className="flex min-h-10 cursor-pointer items-center gap-2.5 text-sm">
+          <Checkbox
+            id="persistent"
+            checked={remember}
+            onCheckedChange={(v) => setRemember(v === true)}
+          />
+          Keep me signed in on this device
+        </label>
+        <Button type="submit" size="lg" className="mt-1 w-full" disabled={mutation.isPending}>
+          {mutation.isPending ? <IconLoader2 className="animate-spin" /> : null}
           {mutation.isPending ? "Signing in…" : "Sign in"}
         </Button>
       </form>
+      <p className="text-muted-foreground text-center text-sm">
+        First time here? Sign in with the password the school gave you. We&apos;ll help you set up your account.
+      </p>
     </div>
   );
 }

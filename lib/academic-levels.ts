@@ -1,83 +1,66 @@
-import type { Student } from "@/types/student";
+import type { CourseFormAvailability, Student } from "@/types/student";
 
 export const FIRST_SEMESTER = "First Semester";
 export const SECOND_SEMESTER = "Second Semester";
+export const SEMESTERS = [FIRST_SEMESTER, SECOND_SEMESTER] as const;
 
-export type ClassRow = {
-  id: string;
-  classLabel: string;
-  status: string;
-  firstSemester: string;
-  secondSemester: string;
-};
-
-export function buildClassRows(user: Student | null): ClassRow[] {
-  if (!user?.classLevel || !user?.program) return [];
-  const currentLevel = parseInt(String(user.classLevel.level), 10) || 100;
-  const programDuration =
-    parseInt(String(user.program.durationInYears), 10) || 4;
-  const levels: ClassRow[] = [];
-  for (let i = 1; i <= programDuration; i++) {
-    const level = i * 100;
-    let status = "Upcoming";
-    let firstSemester = "Upcoming";
-    let secondSemester = "Upcoming";
-    if (level < currentLevel) {
-      status = "Past";
-      firstSemester = "Completed";
-      secondSemester = "Completed";
-    } else if (level === currentLevel) {
-      status = "Current";
-      firstSemester = "Ongoing";
-      secondSemester = "Upcoming";
-    }
-    levels.push({
-      id: level.toString(),
-      classLabel: `${level}`,
-      status,
-      firstSemester,
-      secondSemester,
-    });
-  }
-  return levels;
+/** API stores level as either 100/200/... or 1/2/...; normalise to hundreds. */
+export function toLevel(raw: unknown): number {
+  const n = parseInt(String(raw), 10);
+  if (!n) return 100;
+  return n < 100 ? n * 100 : n;
 }
 
-/** Result tab rows (includes academic year label) */
-export type ResultRow = ClassRow & { year: string };
+export type LevelStatus = "Past" | "Current" | "Upcoming";
 
-export function buildResultRows(user: Student | null): ResultRow[] {
+export type SemesterCell = {
+  semester: string;
+  /** Whether the school has courses on this form (from the API summary). */
+  available: boolean;
+  courseCount: number;
+};
+
+export type LevelRow = {
+  level: number;
+  status: LevelStatus;
+  semesters: SemesterCell[];
+};
+
+/**
+ * One row per level of the student's programme, marked Past / Current /
+ * Upcoming from their class level, with course-form availability merged in.
+ */
+export function buildLevelRows(
+  user: Student | null | undefined,
+  availability: CourseFormAvailability[] = [],
+): LevelRow[] {
   if (!user?.classLevel || !user?.program) return [];
-  const currentLevel = parseInt(String(user.classLevel.level), 10) || 100;
-  const programDuration =
-    parseInt(String(user.program.durationInYears), 10) || 4;
-  const currentYear = new Date().getFullYear();
-  const startYear = currentYear - (Math.floor(currentLevel / 100) - 1);
-  const rows: ResultRow[] = [];
-  for (let i = 1; i <= programDuration; i++) {
+  const currentLevel = toLevel(user.classLevel.level);
+  const duration = parseInt(String(user.program.durationInYears), 10) || 4;
+  const rows: LevelRow[] = [];
+  for (let i = 1; i <= duration; i++) {
     const level = i * 100;
-    const yearStart = startYear + (i - 1);
-    const yearEnd = yearStart + 1;
-    const academicYear = `${yearStart}/${yearEnd}`;
-    let status = "Upcoming";
-    let firstSemester = "Upcoming";
-    let secondSemester = "Upcoming";
-    if (level < currentLevel) {
-      status = "Completed";
-      firstSemester = "Available";
-      secondSemester = "Available";
-    } else if (level === currentLevel) {
-      status = "Active";
-      firstSemester = "Available";
-      secondSemester = "Unavailable";
-    }
+    const status: LevelStatus =
+      level < currentLevel ? "Past" : level === currentLevel ? "Current" : "Upcoming";
     rows.push({
-      id: level.toString(),
-      classLabel: `${level} Level`,
-      year: academicYear,
+      level,
       status,
-      firstSemester,
-      secondSemester,
+      semesters: SEMESTERS.map((semester) => {
+        const hit = availability.find(
+          (a) => toLevel(a.yearId) === level && a.semester === semester,
+        );
+        return {
+          semester,
+          available: status !== "Upcoming" && Boolean(hit?.available),
+          courseCount: hit?.courseCount ?? 0,
+        };
+      }),
     });
   }
   return rows;
+}
+
+/** "200 level" from whatever the API stored. */
+export function levelLabel(raw: unknown): string {
+  return `${toLevel(raw)} level`;
 }

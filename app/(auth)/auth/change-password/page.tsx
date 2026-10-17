@@ -1,6 +1,7 @@
 "use client";
 
 import { useMutation } from "@tanstack/react-query";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -23,6 +24,7 @@ export default function ChangePasswordPage() {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [signedIn, setSignedIn] = useState(false);
 
   useEffect(() => {
     const t = readChangePasswordTransfer();
@@ -32,6 +34,7 @@ export default function ChangePasswordPage() {
     } else if (user) {
       setEmail(user.email ?? "");
       setRegNumber(user.regNumber ?? "");
+      setSignedIn(true);
     }
   }, [user]);
 
@@ -42,6 +45,9 @@ export default function ChangePasswordPage() {
       if (!e && !r) throw new Error("Enter email or registration number.");
       if (!currentPassword || !newPassword) {
         throw new Error("Current and new password are required.");
+      }
+      if (newPassword.length < 8) {
+        throw new Error("Use at least 8 characters for your new password.");
       }
       if (newPassword !== confirmPassword) {
         throw new Error("New passwords do not match.");
@@ -74,9 +80,15 @@ export default function ChangePasswordPage() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="text-lg font-semibold">Change password</h1>
-        <p className="text-muted-foreground mt-1 text-xs">
-          Enter your email or registration number and passwords.
+        <h1 className="text-2xl font-extrabold">Change password</h1>
+        <p className="text-muted-foreground mt-1 text-sm">
+          {signedIn ? (
+            <>
+              For <span className="num text-foreground font-semibold">{regNumber || email}</span>. You&apos;ll stay signed in.
+            </>
+          ) : (
+            "Enter your email or registration number, then your current and new password."
+          )}
         </p>
       </div>
       <form
@@ -86,6 +98,8 @@ export default function ChangePasswordPage() {
           mutation.mutate();
         }}
       >
+        {!signedIn ? (
+        <>
         <div className="flex flex-col gap-2">
           <Label htmlFor="email">Email (optional if reg. no. set)</Label>
           <Input
@@ -106,6 +120,8 @@ export default function ChangePasswordPage() {
             onChange={(e) => setRegNumber(e.target.value)}
           />
         </div>
+        </>
+        ) : null}
         <div className="flex flex-col gap-2">
           <Label htmlFor="currentPassword">Current password</Label>
           <Input
@@ -149,6 +165,11 @@ export default function ChangePasswordPage() {
         >
           {mutation.isPending ? "Saving…" : "Change password"}
         </Button>
+        {signedIn ? (
+          <Button asChild variant="ghost" className="min-h-11">
+            <Link href="/profile">Back to my profile</Link>
+          </Button>
+        ) : null}
       </form>
     </div>
   );

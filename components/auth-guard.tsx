@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { PageLoader } from "@/components/system/page-loader";
+import { BrandLoader } from "@/components/system/brand-loader";
 import { useAuthStore } from "@/stores/auth-store";
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
@@ -18,7 +18,7 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
   }, [hydrated, token, router]);
 
   if (!hydrated || !token) {
-    return <PageLoader className="min-h-[50vh]" />;
+    return <BrandLoader fullscreen />;
   }
 
   return <>{children}</>;

@@ -33,8 +33,8 @@ export default function ForgotPasswordPage() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="text-lg font-semibold">Forgot password</h1>
-        <p className="text-muted-foreground mt-1 text-xs">
+        <h1 className="text-2xl font-extrabold">Forgot password</h1>
+        <p className="text-muted-foreground mt-1 text-sm">
           Enter your email and registration number. We will email you a reset
           link.
         </p>
@@ -69,7 +69,7 @@ export default function ForgotPasswordPage() {
         </Button>
         <Link
           href="/auth/sign-in"
-          className="text-primary text-center text-xs font-medium"
+          className="text-primary-ink inline-flex min-h-10 items-center justify-center text-center text-sm font-semibold hover:underline"
         >
           Back to sign in
         </Link>
