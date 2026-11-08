@@ -7,6 +7,16 @@
  * dynamic `process.env[key]` is undefined in the browser bundle.
  */
 
+/**
+ * Bump when a logo is replaced in place on storage. The URL stays the same and storage
+ * sends no Cache-Control, so without a new ?v= browsers can keep showing the old image.
+ */
+const LOGO_VERSION = "20261102";
+
+function withLogoVersion(url: string): string {
+  return `${url}${url.includes("?") ? "&" : "?"}v=${LOGO_VERSION}`;
+}
+
 function stripQuotes(v: string): string {
   if (
     (v.startsWith('"') && v.endsWith('"')) ||
@@ -29,7 +39,7 @@ function required(raw: string | undefined, key: string): string {
 function loadConfig() {
   const apiBaseUrl = required(process.env.NEXT_PUBLIC_API_BASE_URL, "NEXT_PUBLIC_API_BASE_URL");
   const appName = required(process.env.NEXT_PUBLIC_APP_NAME, "NEXT_PUBLIC_APP_NAME");
-  const logoUrl = required(process.env.NEXT_PUBLIC_LOGO_URL, "NEXT_PUBLIC_LOGO_URL");
+  const logoUrl = withLogoVersion(required(process.env.NEXT_PUBLIC_LOGO_URL, "NEXT_PUBLIC_LOGO_URL"));
   const primaryColor = required(process.env.NEXT_PUBLIC_PRIMARY_COLOR, "NEXT_PUBLIC_PRIMARY_COLOR");
 
   if (!/^#[0-9A-Fa-f]{6}$/.test(primaryColor)) {

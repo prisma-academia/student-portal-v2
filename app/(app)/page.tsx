@@ -12,7 +12,8 @@ import {
 } from "@tabler/icons-react";
 import Link from "next/link";
 import { useState, type ReactNode } from "react";
-import { FeeSheet, usePayFee } from "@/components/payments/fee-parts";
+import { OUTCOME_ICON, outcomeTone } from "@/components/academics/exam-outcome";
+import { FeeSheet, isArrearsFee, usePayFee } from "@/components/payments/fee-parts";
 import { IdCard } from "@/components/student/id-card";
 import { PdfButton } from "@/components/system/pdf-button";
 import { SectionHeading } from "@/components/system/page-header";
@@ -40,7 +41,7 @@ import {
   useStudent,
 } from "@/lib/queries";
 import { cn } from "@/lib/utils";
-import type { Fee, Memo, SchoolEvent } from "@/types/student";
+import type { AcademicSummary, Fee, Memo, SchoolEvent } from "@/types/student";
 
 function AttentionItem({
   tone,
@@ -89,6 +90,9 @@ function NeedsAttention({ onOpenFee }: { onOpenFee: (f: Fee) => void }) {
 
   const { outstanding, owed } = splitFees(fees.data);
   const overdue = outstanding.filter(isOverdue);
+  const arrears = outstanding.filter(isArrearsFee);
+  const arrearsOwed = arrears.reduce((sum, f) => sum + (Number(f.amount) || 0), 0);
+  const feeCount = `${outstanding.length} ${outstanding.length === 1 ? "fee" : "fees"}`;
   const next = outstanding[0];
   const carryOvers = results.data?.outstanding ?? [];
   const missingContact = student && (!student.contactInfo?.phone || !student.contactInfo?.address);
@@ -114,7 +118,7 @@ function NeedsAttention({ onOpenFee }: { onOpenFee: (f: Fee) => void }) {
     items.push(
       <AttentionItem
         key="fees"
-        tone={overdue.length ? "danger" : "warning"}
+        tone={overdue.length || arrears.length ? "danger" : "warning"}
         icon={<IconCreditCard />}
         title={
           <>
@@ -122,9 +126,11 @@ function NeedsAttention({ onOpenFee }: { onOpenFee: (f: Fee) => void }) {
           </>
         }
         detail={
-          overdue.length
-            ? `${overdue.length} overdue · ${outstanding.length} ${outstanding.length === 1 ? "fee" : "fees"} in total`
-            : `${outstanding.length} ${outstanding.length === 1 ? "fee" : "fees"} · next due ${formatDate(next?.dueDate)}`
+          arrears.length
+            ? `${formatNaira(arrearsOwed)} in arrears from earlier sessions · ${feeCount} in total`
+            : overdue.length
+              ? `${overdue.length} overdue · ${feeCount} in total`
+              : `${feeCount} · next due ${formatDate(next?.dueDate)}`
         }
         action={
           <div className="flex gap-2">
@@ -154,7 +160,7 @@ function NeedsAttention({ onOpenFee }: { onOpenFee: (f: Fee) => void }) {
         detail={carryOvers.map((c) => c.code).join(", ")}
         action={
           <Button asChild variant="outline" className="w-full sm:w-auto">
-            <Link href="/academics">See results</Link>
+            <Link href="/academics#resits">Resit options</Link>
           </Button>
         }
       />,
@@ -191,6 +197,54 @@ function NeedsAttention({ onOpenFee }: { onOpenFee: (f: Fee) => void }) {
   }
 
   return <ul className={rowList}>{items}</ul>;
+}
+
+const OUTCOME_DISC = {
+  success: "bg-success-soft text-success",
+  warning: "bg-warning-soft text-[color-mix(in_oklch,var(--warning)_75%,black)] dark:text-warning",
+  danger: "bg-danger-soft text-danger",
+  neutral: "bg-muted text-foreground/70",
+} as const;
+
+/** The newest exam outcome as one row: pass, pass with carry-over, or fail, and why. */
+function LatestOutcome({ summary }: { summary: AcademicSummary }) {
+  const o = summary.latestOutcome;
+  if (!o) return null;
+  const tone = outcomeTone(o);
+  const Icon = OUTCOME_ICON[tone];
+  const sitting = [...summary.semesters].reverse().find((x) => x.outcome);
+  const when = sitting
+    ? o.scope === "session"
+      ? `${sitting.session?.name ?? ""} session`.trim()
+      : [sitting.session?.name, sitting.semester].filter(Boolean).join(" ")
+    : "";
+  const n = o.failedCount;
+  const detail =
+    o.status === "pass"
+      ? "No failed courses"
+      : o.status === "pass_co"
+        ? `${n} ${n === 1 ? "course" : "courses"} to resit: ${o.failedCourses.join(", ")}`
+        : `${n} courses failed (limit: ${o.threshold})`;
+
+  return (
+    <Link
+      href={o.status === "pass_co" ? "/academics#resits" : "/academics"}
+      className={cn(rowPad, "hover:bg-muted/50 group flex items-center gap-3 py-3.5 transition-colors")}
+    >
+      <span className={cn("grid size-10 shrink-0 place-items-center rounded-full [&_svg]:size-5", OUTCOME_DISC[tone])} aria-hidden>
+        <Icon />
+      </span>
+      <div className="min-w-0 flex-1">
+        <p className="font-semibold">
+          <span className="sr-only">Exam outcome: </span>
+          {o.label}
+          {when ? <span className="text-muted-foreground num font-normal"> · {when}</span> : null}
+        </p>
+        <p className="text-muted-foreground truncate text-sm">{detail}</p>
+      </div>
+      <IconArrowRight className="text-muted-foreground size-5 shrink-0 transition-transform group-hover:translate-x-0.5" aria-hidden />
+    </Link>
+  );
 }
 
 function Standing() {
@@ -237,6 +291,7 @@ function Standing() {
       </div>
       <IconArrowRight className="text-muted-foreground size-5 shrink-0 transition-transform group-hover:translate-x-0.5" aria-hidden />
     </Link>
+    <LatestOutcome summary={s} />
     </div>
   );
 }

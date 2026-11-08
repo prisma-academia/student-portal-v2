@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  IconAlertTriangle,
   IconBook2,
   IconChevronDown,
   IconClipboardList,
@@ -9,6 +8,8 @@ import {
 } from "@tabler/icons-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useId, useMemo, useState } from "react";
+import { OutcomeBanner } from "@/components/academics/exam-outcome";
+import { RESIT_ANCHOR, ResitSection } from "@/components/academics/resit-section";
 import { EmptyState } from "@/components/system/empty-state";
 import { PageHeader } from "@/components/system/page-header";
 import { ListSkeleton } from "@/components/system/page-loader";
@@ -24,6 +25,17 @@ import { formatGpa } from "@/lib/format";
 import { useCourseForms, useResults, useStudent } from "@/lib/queries";
 import { cn } from "@/lib/utils";
 import type { ResultSitting } from "@/types/student";
+
+type OutcomeScope = "semester" | "session";
+
+/** "Resit": the score shown is a resit score (only the latest score is ever shown). */
+function ResitBadge({ className }: { className?: string }) {
+  return (
+    <span className={cn("bg-primary-soft text-primary-ink rounded px-1.5 py-0.5 font-sans text-xs font-semibold", className)}>
+      Resit
+    </span>
+  );
+}
 
 function GradeBadge({ grade, pass }: { grade: string; pass: boolean }) {
   return (
@@ -45,10 +57,13 @@ function Sitting({
   sitting,
   decimals,
   defaultOpen,
+  outcomeScope,
 }: {
   sitting: ResultSitting;
   decimals: number;
   defaultOpen: boolean;
+  /** The outcome shows on each sitting only when the school's rule works by semester. */
+  outcomeScope: OutcomeScope;
 }) {
   const [open, setOpen] = useState(defaultOpen);
   const bodyId = useId();
@@ -103,6 +118,16 @@ function Sitting({
         </PdfButton>
       </header>
 
+      {outcomeScope === "semester" ? (
+        <OutcomeBanner
+          outcome={sitting.outcome}
+          pending={sitting.outcomePending}
+          scope="semester"
+          resitHref={`#${RESIT_ANCHOR}`}
+          className="mx-4 mb-4 rounded-[var(--radius-md)] sm:mx-5"
+        />
+      ) : null}
+
       {open ? (
         <div id={bodyId} className="border-t">
 
@@ -121,6 +146,7 @@ function Sitting({
                     Attempt <span className="num">{c.attempt}</span>
                   </span>
                 ) : null}
+                {c.isResit ? <ResitBadge className="ml-2" /> : null}
               </p>
               <p className="text-muted-foreground truncate text-sm">{c.name}</p>
               <p className="text-muted-foreground text-xs">
@@ -163,7 +189,10 @@ function Sitting({
                   </span>
                 ) : null}
               </td>
-              <td className="py-3 pr-3">{c.name}</td>
+              <td className="py-3 pr-3">
+                {c.name}
+                {c.isResit ? <ResitBadge className="ml-2 whitespace-nowrap" /> : null}
+              </td>
               <td className="num py-3 text-right">{c.credit}</td>
               <td className="num py-3 text-right">{c.score}</td>
               <td className="py-3 text-center">
@@ -195,7 +224,15 @@ function groupBySession(sittings: ResultSitting[]): SessionGroup[] {
 }
 
 /** Every sitting, grouped by session, with a session filter once there's more than one. */
-function SessionResults({ sittings, decimals }: { sittings: ResultSitting[]; decimals: number }) {
+function SessionResults({
+  sittings,
+  decimals,
+  outcomeScope,
+}: {
+  sittings: ResultSitting[];
+  decimals: number;
+  outcomeScope: OutcomeScope;
+}) {
   const groups = useMemo(() => groupBySession(sittings), [sittings]);
   const [filter, setFilter] = useState("all");
   const shown = filter === "all" ? groups : groups.filter((g) => g.key === filter);
@@ -233,12 +270,23 @@ function SessionResults({ sittings, decimals }: { sittings: ResultSitting[]; dec
           <h3 id={`session-${g.key}`} className="num text-muted-foreground text-sm font-bold tracking-wide uppercase">
             {g.name} session
           </h3>
+          {/* Session-wide rule: every semester carries the same outcome, so it shows once here. */}
+          {outcomeScope === "session" ? (
+            <OutcomeBanner
+              outcome={g.sittings.find((x) => x.outcome)?.outcome}
+              pending={g.sittings.some((x) => x.outcomePending)}
+              scope="session"
+              resitHref={`#${RESIT_ANCHOR}`}
+              className="rounded-[var(--radius-xl)]"
+            />
+          ) : null}
           {g.sittings.map((sitting) => (
             <Sitting
               key={`${g.key}-${sitting.semester}-${filter}`}
               sitting={sitting}
               decimals={decimals}
               defaultOpen={sitting === latest || filter !== "all"}
+              outcomeScope={outcomeScope}
             />
           ))}
         </section>
@@ -262,6 +310,12 @@ function ResultsTab() {
   const scheme = s?.gradingScheme;
   const decimals = scheme?.gpaDecimals ?? 2;
   const sittings = s?.semesters ?? [];
+  // One rule per scheme: by semester, or once per session (then every semester repeats it).
+  const outcomeScope: OutcomeScope =
+    scheme?.examOutcome?.scope ??
+    s?.latestOutcome?.scope ??
+    sittings.find((x) => x.outcome)?.outcome?.scope ??
+    "semester";
 
   if (!s || !sittings.length) {
     return (
@@ -303,30 +357,9 @@ function ResultsTab() {
         ) : null}
       </section>
 
-      {s.outstanding.length ? (
-        <section className="bg-danger-soft/60 rounded-[var(--radius-xl)] border border-[color-mix(in_oklch,var(--destructive)_22%,transparent)] p-4 sm:p-5">
-          <div className="flex items-start gap-3">
-            <IconAlertTriangle className="text-danger mt-0.5 size-5 shrink-0" aria-hidden />
-            <div className="min-w-0">
-              <p className="font-semibold">
-                You have {s.outstanding.length} carry-over {s.outstanding.length === 1 ? "course" : "courses"} to retake
-              </p>
-              <ul className="mt-2 flex flex-col gap-1 text-sm">
-                {s.outstanding.map((c) => (
-                  <li key={c.courseId}>
-                    <span className="num font-semibold">{c.code}</span> {c.name}{" "}
-                    <span className="text-muted-foreground">
-                      · {c.credit} units · {c.semester}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </section>
-      ) : null}
+      <ResitSection carryOvers={s.outstanding ?? []} />
 
-      <SessionResults sittings={sittings} decimals={decimals} />
+      <SessionResults sittings={sittings} decimals={decimals} outcomeScope={outcomeScope} />
     </div>
   );
 }

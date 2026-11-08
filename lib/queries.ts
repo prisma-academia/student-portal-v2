@@ -5,18 +5,22 @@ import {
   fetchCourseFormSummary,
   fetchDocuments,
   fetchEvents,
-  fetchFees,
+  fetchFeeStatement,
   fetchMe,
   fetchMemos,
+  fetchResits,
   fetchResultsSummary,
 } from "@/lib/api/student";
 import { useAuthStore } from "@/stores/auth-store";
-import type { Fee, Student } from "@/types/student";
+import type { Fee, FeeStatement, Student } from "@/types/student";
 
 /** Shared query keys so Home, Payments and Academics reuse one cache. */
 export const qk = {
   me: ["student", "me"] as const,
+  /** Prefix of every fee query: invalidating it refreshes the statement too. */
   fees: ["student", "fees"] as const,
+  feeStatement: ["student", "fees", "statement", "all"] as const,
+  resits: ["student", "resits"] as const,
   results: ["student", "results-summary"] as const,
   events: ["student", "events"] as const,
   memos: ["student", "memos"] as const,
@@ -49,8 +53,25 @@ export function useStudent() {
   });
 }
 
+const fetchStatementAll = () => unwrap(fetchFeeStatement("all"));
+const selectFees = (s: FeeStatement) => s.fees;
+
+/** Every fee across sessions, with totals, arrears and per-session placement. */
+export function useFeeStatement() {
+  return useQuery({ queryKey: qk.feeStatement, queryFn: fetchStatementAll });
+}
+
+/**
+ * The statement's fees as a list (this session's, earlier sessions' unpaid ones as
+ * arrears, and everything paid). Shares the statement's cache: one request for all.
+ */
 export function useFees() {
-  return useQuery({ queryKey: qk.fees, queryFn: () => unwrap(fetchFees()) });
+  return useQuery({ queryKey: qk.feeStatement, queryFn: fetchStatementAll, select: selectFees });
+}
+
+/** Failed courses to resit and the student's resit registrations. */
+export function useResits() {
+  return useQuery({ queryKey: qk.resits, queryFn: () => unwrap(fetchResits()) });
 }
 
 export function useResults() {
@@ -97,6 +118,6 @@ export function splitFees(fees: Fee[] | undefined) {
 /** "Overdue" when the API says so or the due date has passed. */
 export function isOverdue(fee: Fee) {
   if (fee.isPaid) return false;
-  if (fee.status?.toLowerCase() === "overdue") return true;
+  if (fee.isOverdue || fee.status?.toLowerCase() === "overdue") return true;
   return fee.dueDate ? new Date(fee.dueDate).getTime() < Date.now() : false;
 }

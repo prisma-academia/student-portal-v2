@@ -2,11 +2,15 @@ import type {
   AcademicSummary,
   CourseFormAvailability,
   Fee,
+  FeeStatement,
   Memo,
+  ResitOverview,
+  ResitRegistration,
   SchoolEvent,
   Student,
   StudentDocument,
 } from "@/types/student";
+import { toFeeStatement } from "@/lib/fee-statement";
 import {
   apiGet,
   apiPatch,
@@ -114,6 +118,59 @@ export async function fetchFees() {
   if (!res.ok) return res;
   const list = unwrapData<Fee[]>(res.data);
   return { ...res, data: list } as typeof res & { data: Fee[] };
+}
+
+/**
+ * Fees across sessions with totals, arrears and where the student was each session
+ * (`session`: "all" or a session id). Older APIs ignore `session` and answer with a
+ * plain array; that is read into a statement too (`legacy: true`).
+ */
+export async function fetchFeeStatement(session = "all") {
+  const res = await apiGet<unknown>(`/api/v1/student/me/fees?${new URLSearchParams({ session })}`);
+  if (!res.ok) return res;
+  const statement = toFeeStatement(unwrapData<unknown>(res.data));
+  return { ...res, data: statement } as typeof res & { data: FeeStatement };
+}
+
+/** Failed courses the student can resit, and their resit registrations. */
+export async function fetchResits() {
+  const res = await apiGet<unknown>("/api/v1/student/me/resits");
+  if (!res.ok) return res;
+  const inner = unwrapData<Partial<ResitOverview> | null>(res.data);
+  const data: ResitOverview = {
+    session: inner?.session ?? null,
+    courses: Array.isArray(inner?.courses) ? inner.courses : [],
+    registrations: Array.isArray(inner?.registrations) ? inner.registrations : [],
+  };
+  return { ...res, data } as typeof res & { data: ResitOverview };
+}
+
+export type ResitRegistered = { registration: ResitRegistration; feeId: string; total: number };
+
+/** The API's own success message ("Registered for 2 resit(s)…"), if it sent one. */
+function serverMessage(body: unknown, fallback: string) {
+  const message = (body as { message?: unknown } | null)?.message;
+  return typeof message === "string" && message ? message : fallback;
+}
+
+/** Register to resit failed results; answers with the fee to pay (POST /payment/initialize). */
+export async function registerResits(resultIds: string[]) {
+  const res = await apiPost<unknown>("/api/v1/student/me/resits", { resultIds });
+  if (!res.ok) return res;
+  const data = unwrapData<ResitRegistered>(res.data);
+  return { ...res, data, message: serverMessage(res.data, "Registered for resit") } as typeof res & {
+    data: ResitRegistered;
+  };
+}
+
+/** Cancel an unpaid resit registration. */
+export async function cancelResit(registrationId: string) {
+  const res = await apiPost<unknown>(
+    `/api/v1/student/me/resits/${encodeURIComponent(registrationId)}/cancel`,
+    {},
+  );
+  if (!res.ok) return res;
+  return { ...res, message: serverMessage(res.data, "Resit registration cancelled") };
 }
 
 export async function initializePayment(feeId: string) {

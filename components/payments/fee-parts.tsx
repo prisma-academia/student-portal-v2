@@ -55,6 +55,23 @@ function feeMeta(fee: Fee) {
   return [fee.feeType, fee.session?.name, fee.semester].filter(Boolean).join(" · ");
 }
 
+/** An unpaid fee from an earlier session (the API's `isArrears`). */
+export const isArrearsFee = (fee: Fee) => !!fee.isArrears && !fee.isPaid;
+
+/** The "Arrears" tag: a word on a red tint, beside the fee's type. */
+export function ArrearsBadge({ className }: { className?: string }) {
+  return (
+    <span
+      className={cn(
+        "bg-danger-soft text-danger inline-flex h-5 shrink-0 items-center rounded px-1.5 text-xs font-semibold",
+        className,
+      )}
+    >
+      Arrears
+    </span>
+  );
+}
+
 /** One fee as a statement row: what it is, when, how much, and its state. */
 export function FeeRow({ fee, onOpen }: { fee: Fee; onOpen: (fee: Fee) => void }) {
   const status = feeStatus(fee);
@@ -71,8 +88,9 @@ export function FeeRow({ fee, onOpen }: { fee: Fee; onOpen: (fee: Fee) => void }
         <div className="min-w-0 flex-1">
           <p className="line-clamp-2 font-semibold leading-snug">{fee.name}</p>
           {/* The list is already one session; keep the type and term, never cut the date. */}
-          <p className="text-muted-foreground mt-0.5 truncate text-sm">
-            {[fee.feeType, fee.semester].filter(Boolean).join(" · ")}
+          <p className="text-muted-foreground mt-0.5 flex min-w-0 items-center gap-2 text-sm">
+            {isArrearsFee(fee) ? <ArrearsBadge /> : null}
+            <span className="truncate">{[fee.feeType, fee.semester].filter(Boolean).join(" · ")}</span>
           </p>
           <p className={cn("mt-0.5 text-sm font-medium", isOverdue(fee) ? "text-danger" : "text-muted-foreground")}>{when}</p>
         </div>
@@ -185,6 +203,16 @@ export function FeeSheet({
                 </li>
               </ul>
             </div>
+          ) : null}
+
+          {isArrearsFee(fee) ? (
+            <p className="bg-danger-soft/60 flex items-start gap-2 rounded-[var(--radius-md)] p-3 text-sm">
+              <ArrearsBadge className="mt-px" />
+              <span>
+                Unpaid from {fee.session?.name ? `the ${fee.session.name} session` : "an earlier session"}. It still
+                counts on your account until it&apos;s paid.
+              </span>
+            </p>
           ) : null}
 
           {fee.description ? <p className="text-muted-foreground text-sm">{fee.description}</p> : null}
